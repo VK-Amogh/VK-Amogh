@@ -1,0 +1,58 @@
+<svg width="900" height="145" viewBox="0 0 900 145" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amogh V K animated footer">
+  <defs>
+    <linearGradient id="footBg" x1="0" y1="0" x2="900" y2="145" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#090D16"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="wave1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#14B8A6" stop-opacity="0.24"/>
+      <stop offset="50%" stop-color="#38BDF8" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#14B8A6" stop-opacity="0.24"/>
+    </linearGradient>
+    <linearGradient id="wave2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#A78BFA" stop-opacity="0.18"/>
+      <stop offset="50%" stop-color="#F59E0B" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#14B8A6" stop-opacity="0.18"/>
+    </linearGradient>
+    <clipPath id="footClip">
+      <rect x="1" y="1" width="898" height="143" rx="14"/>
+    </clipPath>
+    <style>
+      .mono { font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .sans { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <g clip-path="url(#footClip)">
+    <rect x="0" y="0" width="900" height="145" fill="url(#footBg)"/>
+
+    <!-- Drifting layered sine waves -->
+    <g>
+      <path d="M 0 92 Q 112 66 225 92 T 450 92 T 675 92 T 900 92 T 1125 92 T 1350 92 L 1350 145 L 0 145 Z" fill="url(#wave1)"/>
+      <animateTransform attributeName="transform" type="translate" from="0 0" to="-450 0" dur="9s" repeatCount="indefinite"/>
+    </g>
+    <g>
+      <path d="M 0 105 Q 112 126 225 105 T 450 105 T 675 105 T 900 105 T 1125 105 T 1350 105 L 1350 145 L 0 145 Z" fill="url(#wave2)"/>
+      <animateTransform attributeName="transform" type="translate" from="-450 0" to="0 0" dur="12s" repeatCount="indefinite"/>
+    </g>
+
+    <!-- Subtle ambient pulsing stars -->
+    <circle cx="95" cy="32" r="2" fill="#2DD4BF"><animate attributeName="opacity" values="0.2;1;0.2" dur="3.2s" repeatCount="indefinite"/></circle>
+    <circle cx="165" cy="54" r="1.5" fill="#38BDF8"><animate attributeName="opacity" values="0.9;0.2;0.9" dur="2.6s" repeatCount="indefinite"/></circle>
+    <circle cx="745" cy="36" r="2" fill="#FBBF24"><animate attributeName="opacity" values="0.2;1;0.2" dur="3.6s" repeatCount="indefinite"/></circle>
+    <circle cx="818" cy="58" r="1.6" fill="#A78BFA"><animate attributeName="opacity" values="1;0.25;1" dur="2.9s" repeatCount="indefinite"/></circle>
+
+    <!-- Signature Motto -->
+    <text x="450" y="52" text-anchor="middle" class="sans" font-size="18" font-weight="600" font-style="italic" fill="#F8FAFC">
+      "What people find boring, is what interests me."
+    </text>
+    <text x="450" y="78" text-anchor="middle" class="mono" font-size="11.5" fill="#94A3B8">
+      Engineering intelligent systems quietly, rigorously, and end to end.
+    </text>
+    <text x="450" y="122" text-anchor="middle" class="mono" font-size="10.5" fill="#CBD5E1" letter-spacing="1.4">
+      AMOGH V K  ·  EVENEI  ·  THE DEVELOPER COMMUNITY  ·  AMOGH.EVENEI.COM
+    </text>
+  </g>
+
+  <rect x="1" y="1" width="898" height="143" rx="14" stroke="#243247" stroke-width="1.2"/>
+</svg>
