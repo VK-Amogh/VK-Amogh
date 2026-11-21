@@ -33,7 +33,7 @@
       <stop offset="100%" stop-color="#2DD4BF"/>
     </linearGradient>
     <clipPath id="clip_L2">
-      <rect x="32" y="267" width="280.28" height="13" rx="6.5"/>
+      <rect x="32" y="267" width="42.34" height="13" rx="6.5"/>
     </clipPath>
     <linearGradient id="grad_L3" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#D97706"/>
@@ -161,8 +161,8 @@
       </circle>
     </g>
     <text x="32" y="224" class="mono" font-size="10" fill="#64748B">Semester 5 / 8 · AICTE Scholar</text>
-    <text x="32" y="257" class="sans" font-size="12.5" font-weight="600" fill="#F1F5F9">Annual GitHub Contributions (1,073 / 1,500)</text>
-    <text x="424" y="257" text-anchor="end" class="mono" font-size="12" font-weight="700" fill="#2DD4BF">71.5%</text>
+    <text x="32" y="257" class="sans" font-size="12.5" font-weight="600" fill="#F1F5F9">Annual GitHub Contributions (129 / 1,200)</text>
+    <text x="424" y="257" text-anchor="end" class="mono" font-size="12" font-weight="700" fill="#2DD4BF">10.8%</text>
     
     <g>
       <rect x="32" y="267" width="392" height="13" rx="6.5" fill="#0F172A" stroke="#1E293B" stroke-width="1"/>
@@ -170,24 +170,24 @@
       <line x1="228.0" y1="268.5" x2="228.0" y2="278.5" stroke="#1E293B" stroke-width="1"/>
       <line x1="326.0" y1="268.5" x2="326.0" y2="278.5" stroke="#1E293B" stroke-width="1"/>
       <g clip-path="url(#clip_L2)">
-        <rect x="32" y="267" width="280.28" height="13" rx="6.5" fill="url(#grad_L2)"/>
-        <rect x="8" y="267" width="328.28" height="13" fill="url(#kineticStripes)" opacity="0.26">
+        <rect x="32" y="267" width="42.34" height="13" rx="6.5" fill="url(#grad_L2)"/>
+        <rect x="8" y="267" width="90.34" height="13" fill="url(#kineticStripes)" opacity="0.26">
           <animateTransform attributeName="transform" type="translate" from="0 0" to="20 0" dur="1.15s" repeatCount="indefinite"/>
         </rect>
-        <rect x="32" y="267" width="280.28" height="5.46" fill="#FFFFFF" opacity="0.16"/>
+        <rect x="32" y="267" width="42.34" height="5.46" fill="#FFFFFF" opacity="0.16"/>
         <rect x="-99.6" y="265" width="117.6" height="17" fill="url(#barShimmer)" opacity="0.88">
-          <animate attributeName="x" from="-99.6" to="338.3" begin="0.80s" dur="3.50s" repeatCount="indefinite"/>
+          <animate attributeName="x" from="-99.6" to="100.3" begin="0.80s" dur="3.50s" repeatCount="indefinite"/>
         </rect>
       </g>
-      <circle cx="308.7" cy="273.5" r="8.45" fill="#2DD4BF" opacity="0.34">
+      <circle cx="70.77" cy="273.5" r="8.45" fill="#2DD4BF" opacity="0.34">
         <animate attributeName="opacity" values="0.14;0.55;0.14" begin="0.80s" dur="2.1s" repeatCount="indefinite"/>
         <animate attributeName="r" values="5.85;11.96;5.85" begin="0.80s" dur="2.1s" repeatCount="indefinite"/>
       </circle>
-      <circle cx="308.7" cy="273.5" r="3.9" fill="#FFFFFF" opacity="0.94">
+      <circle cx="70.77" cy="273.5" r="3.9" fill="#FFFFFF" opacity="0.94">
         <animate attributeName="opacity" values="0.62;1;0.62" begin="0.80s" dur="2.1s" repeatCount="indefinite"/>
       </circle>
     </g>
-    <text x="32" y="296" class="mono" font-size="10" fill="#64748B">1,046 commits · 64 active days</text>
+    <text x="32" y="296" class="mono" font-size="10" fill="#64748B">112 commits · 23 active days</text>
     <text x="32" y="329" class="sans" font-size="12.5" font-weight="600" fill="#F1F5F9">Open-Source Repositories (18 / 25)</text>
     <text x="424" y="329" text-anchor="end" class="mono" font-size="12" font-weight="700" fill="#FBBF24">72.0%</text>
     
@@ -354,6 +354,6 @@
   <!-- Bottom-left Live Velocity Strip -->
   <line x1="32" y1="390" x2="424" y2="390" stroke="#1E293B" stroke-width="1"/>
   <rect x="32" y="416" width="5" height="8" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="4;12;5" dur="1.10s" repeatCount="indefinite"/><animate attributeName="y" values="420;412;419" dur="1.10s" repeatCount="indefinite"/></rect><rect x="41" y="408" width="5" height="16" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="8;20;10" dur="1.38s" repeatCount="indefinite"/><animate attributeName="y" values="416;404;414" dur="1.38s" repeatCount="indefinite"/></rect><rect x="50" y="413" width="5" height="11" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="4;15;5" dur="1.66s" repeatCount="indefinite"/><animate attributeName="y" values="420;409;419" dur="1.66s" repeatCount="indefinite"/></rect><rect x="59" y="404" width="5" height="20" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="12;24;14" dur="1.94s" repeatCount="indefinite"/><animate attributeName="y" values="412;400;410" dur="1.94s" repeatCount="indefinite"/></rect><rect x="68" y="410" width="5" height="14" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="6;18;8" dur="2.22s" repeatCount="indefinite"/><animate attributeName="y" values="418;406;416" dur="2.22s" repeatCount="indefinite"/></rect><rect x="77" y="406" width="5" height="18" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="10;22;12" dur="1.10s" repeatCount="indefinite"/><animate attributeName="y" values="414;402;412" dur="1.10s" repeatCount="indefinite"/></rect><rect x="86" y="415" width="5" height="9" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="4;13;5" dur="1.38s" repeatCount="indefinite"/><animate attributeName="y" values="420;411;419" dur="1.38s" repeatCount="indefinite"/></rect><rect x="95" y="402" width="5" height="22" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="14;26;16" dur="1.66s" repeatCount="indefinite"/><animate attributeName="y" values="410;398;408" dur="1.66s" repeatCount="indefinite"/></rect><rect x="104" y="411" width="5" height="13" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="5;17;7" dur="1.94s" repeatCount="indefinite"/><animate attributeName="y" values="419;407;417" dur="1.94s" repeatCount="indefinite"/></rect><rect x="113" y="407" width="5" height="17" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="9;21;11" dur="2.22s" repeatCount="indefinite"/><animate attributeName="y" values="415;403;413" dur="2.22s" repeatCount="indefinite"/></rect><rect x="122" y="414" width="5" height="10" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="4;14;5" dur="1.10s" repeatCount="indefinite"/><animate attributeName="y" values="420;410;419" dur="1.10s" repeatCount="indefinite"/></rect><rect x="131" y="405" width="5" height="19" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="11;23;13" dur="1.38s" repeatCount="indefinite"/><animate attributeName="y" values="413;401;411" dur="1.38s" repeatCount="indefinite"/></rect><rect x="140" y="412" width="5" height="12" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="4;16;6" dur="1.66s" repeatCount="indefinite"/><animate attributeName="y" values="420;408;418" dur="1.66s" repeatCount="indefinite"/></rect><rect x="149" y="409" width="5" height="15" rx="2.5" fill="#14B8A6" opacity="0.88"><animate attributeName="height" values="7;19;9" dur="1.94s" repeatCount="indefinite"/><animate attributeName="y" values="417;405;415" dur="1.94s" repeatCount="indefinite"/></rect>
-  <text x="172" y="411" class="mono" font-size="10.5" font-weight="600" fill="#CBD5E1">PEAK VELOCITY: 110 COMMITS / DAY</text>
+  <text x="172" y="411" class="mono" font-size="10.5" font-weight="600" fill="#CBD5E1">PEAK VELOCITY: 38 COMMITS / DAY</text>
   <text x="172" y="428" class="mono" font-size="9.5" fill="#64748B">Synced daily via GitHub Actions GraphQL</text>
 </svg>
