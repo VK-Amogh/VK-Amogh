@@ -238,9 +238,8 @@
 <br/>
 
 <div align="center">
-  <img height="182" src="https://github-readme-stats.vercel.app/api?username=VK-Amogh&show_icons=true&include_all_commits=true&count_private=true&bg_color=0B1120&border_color=243247&border_radius=12&title_color=2DD4BF&icon_color=38BDF8&text_color=CBD5E1&ring_color=14B8A6" alt="VK-Amogh GitHub Stats" />
-  &nbsp;
-  <img height="182" src="https://streak-stats.demolab.com/?user=VK-Amogh&background=0B1120&border=243247&border_radius=12&ring=14B8A6&fire=F59E0B&currStreakLabel=2DD4BF&sideLabels=94A3B8&currStreakNum=F8FAFC&sideNums=F8FAFC&dates=64748B&stroke=1E293B" alt="VK-Amogh Contribution Streak" />
+  <img width="48.8%" src="https://github-readme-stats.vercel.app/api?username=VK-Amogh&show_icons=true&include_all_commits=true&count_private=true&bg_color=0B1120&border_color=243247&border_radius=12&title_color=2DD4BF&icon_color=38BDF8&text_color=CBD5E1&ring_color=14B8A6" alt="VK-Amogh GitHub Stats" />
+  <img width="48.8%" src="https://streak-stats.demolab.com/?user=VK-Amogh&background=0B1120&border=243247&border_radius=12&ring=14B8A6&fire=F59E0B&currStreakLabel=2DD4BF&sideLabels=94A3B8&currStreakNum=F8FAFC&sideNums=F8FAFC&dates=64748B&stroke=1E293B" alt="VK-Amogh Contribution Streak" />
 </div>
 
 <br/>

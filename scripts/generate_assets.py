@@ -463,9 +463,11 @@ def generate_divider() -> str:
 
 
 def generate_terminal_card(metrics: dict) -> str:
-    contribs = f"{metrics['total_contributions']:,}+"
+    # Verified baseline of 1,073 across public + private repos; auto-grows when public+private exceeds it
+    total_all = max(metrics["total_contributions"], 1073)
+    contribs = f"{total_all:,}+"
     kpis = [
-        (contribs, "GitHub Contribs (1Y)", "#14B8A6", "#0F2929"),
+        (contribs, "Total Contribs (26 Repos)", "#14B8A6", "#0F2929"),
         ("10,000+", "Vets via Vetifi AI", "#38BDF8", "#0E2235"),
         ("1,000+", "TDC Builders (5+ Univ)", "#A78BFA", "#1C1836"),
         ("0.261s", "TRACE 189-File Audit", "#2DD4BF", "#0E2926"),
@@ -553,7 +555,14 @@ def generate_terminal_card(metrics: dict) -> str:
 
 def generate_progress_bars(metrics: dict, chrono: dict) -> str:
     contribs = metrics["total_contributions"]
-    contrib_goal = max(1200, int(math.ceil((contribs + 100) / 500.0) * 500))
+    if contribs < 500:
+        contrib_goal = max(200, int(math.ceil((contribs + 25) / 50.0) * 50))
+        contrib_title = f"Public GitHub Contributions ({contribs:,} / {contrib_goal:,})"
+        contrib_sub = f"{metrics['commits']:,} public commits · 1,073+ incl. private"
+    else:
+        contrib_goal = max(1200, int(math.ceil((contribs + 100) / 500.0) * 500))
+        contrib_title = f"Annual GitHub Contributions ({contribs:,} / {contrib_goal:,})"
+        contrib_sub = f"{metrics['commits']:,} commits · {metrics['active_days']} active days"
     contrib_pct = round(min(100.0, (contribs / contrib_goal) * 100.0), 1)
 
     pub_repos = metrics["public_repos"]
@@ -576,8 +585,8 @@ def generate_progress_bars(metrics: dict, chrono: dict) -> str:
             "#A78BFA",
         ),
         (
-            f"Annual GitHub Contributions ({contribs:,} / {contrib_goal:,})",
-            f"{metrics['commits']:,} commits · {metrics['active_days']} active days",
+            contrib_title,
+            contrib_sub,
             contrib_pct,
             "#0D9488",
             "#2DD4BF",
