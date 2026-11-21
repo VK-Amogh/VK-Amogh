@@ -33,7 +33,7 @@
       <stop offset="100%" stop-color="#2DD4BF"/>
     </linearGradient>
     <clipPath id="clip_L2">
-      <rect x="32" y="267" width="42.34" height="13" rx="6.5"/>
+      <rect x="32" y="267" width="252.84" height="13" rx="6.5"/>
     </clipPath>
     <linearGradient id="grad_L3" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#D97706"/>
@@ -161,8 +161,8 @@
       </circle>
     </g>
     <text x="32" y="224" class="mono" font-size="10" fill="#64748B">Semester 5 / 8 · AICTE Scholar</text>
-    <text x="32" y="257" class="sans" font-size="12.5" font-weight="600" fill="#F1F5F9">Annual GitHub Contributions (129 / 1,200)</text>
-    <text x="424" y="257" text-anchor="end" class="mono" font-size="12" font-weight="700" fill="#2DD4BF">10.8%</text>
+    <text x="32" y="257" class="sans" font-size="12.5" font-weight="600" fill="#F1F5F9">Public GitHub Contributions (129 / 200)</text>
+    <text x="424" y="257" text-anchor="end" class="mono" font-size="12" font-weight="700" fill="#2DD4BF">64.5%</text>
     
     <g>
       <rect x="32" y="267" width="392" height="13" rx="6.5" fill="#0F172A" stroke="#1E293B" stroke-width="1"/>
@@ -170,24 +170,24 @@
       <line x1="228.0" y1="268.5" x2="228.0" y2="278.5" stroke="#1E293B" stroke-width="1"/>
       <line x1="326.0" y1="268.5" x2="326.0" y2="278.5" stroke="#1E293B" stroke-width="1"/>
       <g clip-path="url(#clip_L2)">
-        <rect x="32" y="267" width="42.34" height="13" rx="6.5" fill="url(#grad_L2)"/>
-        <rect x="8" y="267" width="90.34" height="13" fill="url(#kineticStripes)" opacity="0.26">
+        <rect x="32" y="267" width="252.84" height="13" rx="6.5" fill="url(#grad_L2)"/>
+        <rect x="8" y="267" width="300.84000000000003" height="13" fill="url(#kineticStripes)" opacity="0.26">
           <animateTransform attributeName="transform" type="translate" from="0 0" to="20 0" dur="1.15s" repeatCount="indefinite"/>
         </rect>
-        <rect x="32" y="267" width="42.34" height="5.46" fill="#FFFFFF" opacity="0.16"/>
+        <rect x="32" y="267" width="252.84" height="5.46" fill="#FFFFFF" opacity="0.16"/>
         <rect x="-99.6" y="265" width="117.6" height="17" fill="url(#barShimmer)" opacity="0.88">
-          <animate attributeName="x" from="-99.6" to="100.3" begin="0.80s" dur="3.50s" repeatCount="indefinite"/>
+          <animate attributeName="x" from="-99.6" to="310.8" begin="0.80s" dur="3.50s" repeatCount="indefinite"/>
         </rect>
       </g>
-      <circle cx="70.77" cy="273.5" r="8.45" fill="#2DD4BF" opacity="0.34">
+      <circle cx="281.27" cy="273.5" r="8.45" fill="#2DD4BF" opacity="0.34">
         <animate attributeName="opacity" values="0.14;0.55;0.14" begin="0.80s" dur="2.1s" repeatCount="indefinite"/>
         <animate attributeName="r" values="5.85;11.96;5.85" begin="0.80s" dur="2.1s" repeatCount="indefinite"/>
       </circle>
-      <circle cx="70.77" cy="273.5" r="3.9" fill="#FFFFFF" opacity="0.94">
+      <circle cx="281.27" cy="273.5" r="3.9" fill="#FFFFFF" opacity="0.94">
         <animate attributeName="opacity" values="0.62;1;0.62" begin="0.80s" dur="2.1s" repeatCount="indefinite"/>
       </circle>
     </g>
-    <text x="32" y="296" class="mono" font-size="10" fill="#64748B">112 commits · 23 active days</text>
+    <text x="32" y="296" class="mono" font-size="10" fill="#64748B">112 public commits · 1,073+ incl. private</text>
     <text x="32" y="329" class="sans" font-size="12.5" font-weight="600" fill="#F1F5F9">Open-Source Repositories (18 / 25)</text>
     <text x="424" y="329" text-anchor="end" class="mono" font-size="12" font-weight="700" fill="#FBBF24">72.0%</text>
     
