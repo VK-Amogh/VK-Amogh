@@ -1,4 +1,4 @@
-name: Update GitHub Profile Telemetry & Animations
+name: Update Quiet Studio Profile Telemetry & Animations
 
 on:
   schedule:
@@ -26,18 +26,17 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Generate animated SVG telemetry & progress bars
+      - name: Generate Quiet Studio animated SVGs & progress ledgers
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 scripts/generate_assets.py
 
-      - name: Generate animated GitHub contribution snake
+      - name: Generate warm-paper editorial contribution snake
         uses: Platane/snk/svg-only@v3
         with:
           github_user_name: VK-Amogh
           outputs: |
-            assets/snake-dark.svg?palette=github-dark&color_snake=f59e0b&color_dots=#161b22,#0e4429,#006d32,#14b8a6,#38bdf8
-            assets/snake-light.svg?palette=github-light&color_snake=0d9488
+            assets/snake-paper.svg?color_snake=d95d39&color_dots=#ece3d5,#bacfae,#a9ccc4,#1e5a52,#1a1412
 
       - name: Commit updated SVG assets
         run: |
@@ -47,6 +46,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No SVG asset changes to commit."
           else
-            git commit -m "chore(telemetry): refresh animated SVGs and progress bars [skip ci]"
+            git commit -m "chore(studio): refresh editorial SVGs, progress ledger & snake [skip ci]"
             git push
           fi

@@ -1,0 +1,62 @@
+<svg width="440" height="252" viewBox="0 0 440 252" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TRACE — Security that proves itself.">
+  <defs>
+    <clipPath id="pclip_trace">
+      <rect x="1" y="1" width="438" height="250" rx="16"/>
+    </clipPath>
+    <style>
+      .serif { font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif; }
+      .sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <g clip-path="url(#pclip_trace)">
+    <rect x="0" y="0" width="440" height="252" fill="#A9CCC4"/>
+
+    <!-- Flat drifting Bauhaus solid forms (straight from Poster.jsx) -->
+    
+        <rect x="278" y="-36" width="128" height="270" rx="64" fill="#F0926A">
+          <animateTransform attributeName="transform" type="translate" values="0,0; 0,10; 0,0" dur="10s" repeatCount="indefinite"/>
+        </rect>
+        <circle cx="22" cy="242" r="72" fill="#F4EDE3" opacity="0.58"/>
+        <rect x="336" y="198" width="90" height="62" rx="10" fill="#E9BF52"/>
+
+    <!-- Top meta bar -->
+    <text x="26" y="30" class="sans" font-size="9.5" font-weight="600" fill="#1A1412" fill-opacity="0.72" letter-spacing="1.7">TRACE</text>
+    <text x="414" y="30" text-anchor="end" class="sans" font-size="9.5" font-weight="600" fill="#1A1412" fill-opacity="0.72" letter-spacing="1.5">2026</text>
+
+    <!-- Two-line editorial serif headline (second line italic!) -->
+    <text x="26" y="102" class="serif" font-size="34" font-weight="400" fill="#1A1412" letter-spacing="-0.6">Security that</text>
+    <text x="26" y="138" class="serif" font-size="34" font-weight="400" font-style="italic" fill="#1A1412" letter-spacing="-0.6">proves itself.</text>
+
+    <!-- Concise tagline -->
+    <text x="26" y="166" class="sans" font-size="11.5" fill="#1A1412" fill-opacity="0.78">Local-first AST &amp; Attack-Path scanner.</text>
+    <text x="26" y="182" class="sans" font-size="11.5" fill="#1A1412" fill-opacity="0.78">0.261s · 189 files · 0 tokens · MCP</text>
+
+    <!-- Bespoke animated architectural vector motif on right -->
+    <g transform="translate(274, 62)">
+      <rect x="0" y="0" width="140" height="122" rx="12" fill="#F4EDE3" fill-opacity="0.88" stroke="#1A1412" stroke-opacity="0.22" stroke-width="1"/>
+      
+        <line x1="22" y1="61" x2="62" y2="34" stroke="#1A1412" stroke-opacity="0.3" stroke-width="1.2"/>
+        <line x1="22" y1="61" x2="62" y2="88" stroke="#1A1412" stroke-opacity="0.3" stroke-width="1.2"/>
+        <line x1="62" y1="34" x2="100" y2="61" stroke="#1A1412" stroke-opacity="0.3" stroke-width="1.2"/>
+        <line x1="62" y1="88" x2="100" y2="61" stroke="#1A1412" stroke-opacity="0.3" stroke-width="1.2"/>
+        <line x1="100" y1="61" x2="124" y2="61" stroke="#D95D39" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <circle cx="0" cy="0" r="3.6" fill="#D95D39">
+          <animateMotion dur="3.4s" repeatCount="indefinite" path="M 22,61 L 62,34 L 100,61 L 124,61"/>
+        </circle>
+        <circle cx="22" cy="61" r="7" fill="#A9CCC4" stroke="#1A1412" stroke-width="1"/>
+        <circle cx="62" cy="34" r="6" fill="#E9BF52" stroke="#1A1412" stroke-width="1"/>
+        <circle cx="62" cy="88" r="6" fill="#9DBDD8" stroke="#1A1412" stroke-width="1"/>
+        <rect x="92" y="53" width="16" height="16" rx="4" fill="#F4EDE3" stroke="#1A1412" stroke-width="1"/>
+        <circle cx="124" cy="61" r="7.5" fill="#F0926A" stroke="#1A1412" stroke-width="1"/>
+        <text x="12" y="112" class="sans" font-size="8" font-weight="600" fill="#8F3E26" letter-spacing="1.2">APM · 100% RECALL</text>
+    </g>
+
+    <!-- Bottom editorial footer & arrow -->
+    <line x1="26" y1="214" x2="414" y2="214" stroke="#1A1412" stroke-opacity="0.16" stroke-width="1"/>
+    <text x="26" y="234" class="sans" font-size="9.5" font-weight="600" fill="#1A1412" fill-opacity="0.76" letter-spacing="1.6">PARSE, MODEL, VERIFY</text>
+    <text x="414" y="235" text-anchor="end" class="sans" font-size="15" font-weight="400" fill="#1A1412">↗</text>
+  </g>
+
+  <rect x="1" y="1" width="438" height="250" rx="16" stroke="#1A1412" stroke-opacity="0.14" stroke-width="1"/>
+</svg>

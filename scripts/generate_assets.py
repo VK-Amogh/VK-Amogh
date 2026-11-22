@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
-Generate bespoke animated SVG telemetry assets for VK-Amogh's GitHub profile.
-Uses Python stdlib only so GitHub Actions stays fast and dependency-free.
+Generate bespoke Quiet Studio editorial SVG assets for VK-Amogh's GitHub profile.
+Mirrors the exact design language of amogh.evenei.com:
+  warm cotton paper (#F4EDE3), espresso ink (#1A1412), terracotta coral (#D95D39),
+  flat matte Bauhaus pastels, 1px editorial hairlines, serif display typography,
+  and calm architectural kinetic micro-animations.
+Zero external dependencies (Python stdlib only) for fast GitHub Actions runs.
 """
 
 from __future__ import annotations
@@ -19,20 +23,40 @@ USERNAME = "VK-Amogh"
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS_DIR = ROOT / "assets"
 
-LANG_COLORS = {
-    "Python": ("#38BDF8", "#2563EB"),
-    "Dart": ("#2DD4BF", "#0D9488"),
-    "TypeScript": ("#60A5FA", "#3B82F6"),
-    "JavaScript": ("#FBBF24", "#D97706"),
-    "C++": ("#F472B6", "#DB2777"),
-    "C": ("#A78BFA", "#7C3AED"),
-    "HTML": ("#FB923C", "#EA580C"),
-    "CSS": ("#C084FC", "#9333EA"),
-    "ShaderLab": ("#34D399", "#059669"),
-    "Jupyter Notebook": ("#F59E0B", "#B45309"),
-    "Kotlin": ("#A78BFA", "#6D28D9"),
-    "Java": ("#FB7185", "#E11D48"),
-    "PLpgSQL": ("#22D3EE", "#0891B2"),
+# Quiet Studio flat matte pastel/ink palette — ZERO gradients, ZERO neon
+PAPER = "#F4EDE3"
+PAPER_DEEP = "#ECE3D5"
+INK = "#1A1412"
+INK_SOFT = "#3D2F28"
+INK_MUTED = "#8F3E26"
+INK_TEAL = "#1E5A52"
+INK_NAVY = "#2A3F66"
+LINE = "#DDD4C7"
+LINE_STRONG = "#C5B9A9"
+
+CORAL = "#D95D39"
+CORAL_SOFT = "#F0926A"
+MARIGOLD = "#E9BF52"
+SKY = "#9DBDD8"
+SKY_SLATE = "#A6C3D6"
+ROSE = "#EDB3C3"
+SAGE = "#BACFAE"
+SEAGLASS = "#A9CCC4"
+LILAC = "#C3BBE3"
+PEACH = "#F1B48E"
+SAND = "#E7D3AE"
+
+LANG_PALETTE = {
+    "Python": INK_NAVY,
+    "Dart": INK_TEAL,
+    "TypeScript": SKY,
+    "HTML": CORAL_SOFT,
+    "CSS": LILAC,
+    "ShaderLab": SAGE,
+    "JavaScript": MARIGOLD,
+    "C++": ROSE,
+    "Jupyter Notebook": PEACH,
+    "Kotlin": SAND,
 }
 
 GRAPHQL_QUERY = """
@@ -106,7 +130,7 @@ def fetch_github_data() -> dict:
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
-            "User-Agent": "VK-Amogh-Profile-Generator",
+            "User-Agent": "VK-Amogh-Quiet-Studio-Generator",
         },
         method="POST",
     )
@@ -131,7 +155,6 @@ def fetch_github_data() -> dict:
     stars = sum(n.get("stargazerCount", 0) for n in nodes)
     forks = sum(n.get("forkCount", 0) for n in nodes)
 
-    # Repo-weighted language share so one repo with large data files doesn't skew everything
     weights: dict[str, float] = {}
     for repo in nodes:
         edges = (repo.get("languages") or {}).get("edges") or []
@@ -183,7 +206,6 @@ def compute_chronology(now: dt.datetime) -> dict:
     day_of_year = (now - year_start).days + 1
     days_in_year = (year_end - year_start).days
 
-    # B.Tech ECE at MIT Bengaluru: Aug 1, 2024 -> May 31, 2028
     deg_start = dt.datetime(2024, 8, 1, tzinfo=dt.timezone.utc)
     deg_end = dt.datetime(2028, 5, 31, tzinfo=dt.timezone.utc)
     deg_pct = ((now - deg_start).total_seconds() / (deg_end - deg_start).total_seconds()) * 100.0
@@ -197,368 +219,528 @@ def compute_chronology(now: dt.datetime) -> dict:
         "days_in_year": days_in_year,
         "deg_pct": round(deg_pct, 1),
         "sem": sem,
-        "date_str": now.strftime("%Y-%m-%d UTC"),
+        "date_str": now.strftime("%d %b %Y"),
     }
 
 
-def render_animated_bar(
+def render_editorial_bar(
     uid: str,
     x: float,
     y: float,
     width: float,
     height: float,
     pct: float,
-    c1: str,
-    c2: str,
-    delay: float = 0.0,
-    shimmer_dur: float = 3.0,
-    shimmer_offset: float = 0.0,
+    fill_color: str,
+    dark_fill: bool = False,
+    hatch_dur: float = 2.6,
+    phase: float = 0.0,
 ) -> tuple[str, str]:
-    """Return (defs_snippet, elements_snippet) for a kinetic animated progress bar."""
+    """Swiss architectural ruler progress bar — flat matte fill, moving draughtsman hatch, crisp ink needle."""
     clamped = max(5.0, min(100.0, pct))
     fill_w = round(width * (clamped / 100.0), 2)
     rx = round(height / 2.0, 2)
-    tip_cx = round(x + fill_w - max(2.5, rx * 0.55), 2)
-    tip_cy = round(y + height / 2.0, 2)
+    tip_x = round(x + fill_w, 2)
+    cy = round(y + height / 2.0, 2)
 
-    defs = f"""
-    <linearGradient id="grad_{uid}" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="{c1}"/>
-      <stop offset="100%" stop-color="{c2}"/>
-    </linearGradient>
-    <clipPath id="clip_{uid}">
-      <rect x="{x}" y="{y}" width="{fill_w}" height="{height}" rx="{rx}"/>
-    </clipPath>"""
+    hatch_pat = "hatchLight" if dark_fill else "hatchInk"
+    hatch_opacity = "0.22" if dark_fill else "0.14"
 
-    # Telemetry tick marks at 25%, 50%, 75%
     t25 = round(x + width * 0.25, 1)
     t50 = round(x + width * 0.50, 1)
     t75 = round(x + width * 0.75, 1)
 
-    shimmer_w = max(68.0, round(width * 0.30, 1))
-    s_from = round(x - shimmer_w - 14, 1)
-    s_to = round(x + fill_w + 26, 1)
-    stripe_dur = round(1.15 + (shimmer_offset % 0.4), 2)
+    defs = f"""
+    <clipPath id="clip_{uid}">
+      <rect x="{x}" y="{y}" width="{fill_w}" height="{height}" rx="{rx}"/>
+    </clipPath>"""
 
     elems = f"""
     <g>
-      <rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{rx}" fill="#0F172A" stroke="#1E293B" stroke-width="1"/>
-      <line x1="{t25}" y1="{y + 1.5}" x2="{t25}" y2="{y + height - 1.5}" stroke="#1E293B" stroke-width="1"/>
-      <line x1="{t50}" y1="{y + 1.5}" x2="{t50}" y2="{y + height - 1.5}" stroke="#1E293B" stroke-width="1"/>
-      <line x1="{t75}" y1="{y + 1.5}" x2="{t75}" y2="{y + height - 1.5}" stroke="#1E293B" stroke-width="1"/>
+      <!-- Warm deep-paper ruler track with subtle quarter ticks -->
+      <rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{rx}" fill="{PAPER_DEEP}" stroke="{LINE_STRONG}" stroke-width="1"/>
+      <line x1="{t25}" y1="{y + 2}" x2="{t25}" y2="{y + height - 2}" stroke="{INK}" stroke-opacity="0.14" stroke-width="1"/>
+      <line x1="{t50}" y1="{y + 1.5}" x2="{t50}" y2="{y + height - 1.5}" stroke="{INK}" stroke-opacity="0.22" stroke-width="1"/>
+      <line x1="{t75}" y1="{y + 2}" x2="{t75}" y2="{y + height - 2}" stroke="{INK}" stroke-opacity="0.14" stroke-width="1"/>
+
+      <!-- Crisp matte solid fill + calm kinetic draughtsman hatching -->
       <g clip-path="url(#clip_{uid})">
-        <rect x="{x}" y="{y}" width="{fill_w}" height="{height}" rx="{rx}" fill="url(#grad_{uid})"/>
-        <rect x="{x - 24}" y="{y}" width="{fill_w + 48}" height="{height}" fill="url(#kineticStripes)" opacity="0.26">
-          <animateTransform attributeName="transform" type="translate" from="0 0" to="20 0" dur="{stripe_dur:.2f}s" repeatCount="indefinite"/>
-        </rect>
-        <rect x="{x}" y="{y}" width="{fill_w}" height="{round(height * 0.42, 2)}" fill="#FFFFFF" opacity="0.16"/>
-        <rect x="{s_from}" y="{y - 2}" width="{shimmer_w}" height="{height + 4}" fill="url(#barShimmer)" opacity="0.88">
-          <animate attributeName="x" from="{s_from}" to="{s_to}" begin="{shimmer_offset:.2f}s" dur="{shimmer_dur:.2f}s" repeatCount="indefinite"/>
+        <rect x="{x}" y="{y}" width="{fill_w}" height="{height}" rx="{rx}" fill="{fill_color}"/>
+        <rect x="{x - 24}" y="{y}" width="{fill_w + 48}" height="{height}" fill="url(#{hatch_pat})" opacity="{hatch_opacity}">
+          <animateTransform attributeName="transform" type="translate" from="0 0" to="14 0" dur="{hatch_dur:.2f}s" repeatCount="indefinite"/>
         </rect>
       </g>
-      <circle cx="{tip_cx}" cy="{tip_cy}" r="{round(height * 0.65, 2)}" fill="{c2}" opacity="0.34">
-        <animate attributeName="opacity" values="0.14;0.55;0.14" begin="{shimmer_offset:.2f}s" dur="2.1s" repeatCount="indefinite"/>
-        <animate attributeName="r" values="{round(height * 0.45, 2)};{round(height * 0.92, 2)};{round(height * 0.45, 2)}" begin="{shimmer_offset:.2f}s" dur="2.1s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="{tip_cx}" cy="{tip_cy}" r="{round(height * 0.30, 2)}" fill="#FFFFFF" opacity="0.94">
-        <animate attributeName="opacity" values="0.62;1;0.62" begin="{shimmer_offset:.2f}s" dur="2.1s" repeatCount="indefinite"/>
+
+      <!-- Architectural border around fill -->
+      <rect x="{x}" y="{y}" width="{fill_w}" height="{height}" rx="{rx}" fill="none" stroke="{INK}" stroke-opacity="0.28" stroke-width="0.9"/>
+
+      <!-- Quiet breathing Vernier calibration needle at exact percentage frontier -->
+      <line x1="{tip_x}" y1="{y - 3.5}" x2="{tip_x}" y2="{y + height + 3.5}" stroke="{INK}" stroke-width="1.3" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.95;0.45;0.95" begin="{phase:.2f}s" dur="3.4s" repeatCount="indefinite"/>
+      </line>
+      <circle cx="{tip_x}" cy="{y - 3.5}" r="2.2" fill="{CORAL}">
+        <animate attributeName="r" values="2;2.8;2" begin="{phase:.2f}s" dur="3.4s" repeatCount="indefinite"/>
       </circle>
     </g>"""
     return defs, elems
 
 
-def generate_hero_banner() -> str:
-    return """<svg width="900" height="278" viewBox="0 0 900 278" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amogh V K — Systems, AI, Security, Flutter, and Aerospace Engineer">
-  <defs>
-    <linearGradient id="heroBg" x1="0" y1="0" x2="900" y2="278" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#090D16"/>
-      <stop offset="55%" stop-color="#0E1525"/>
-      <stop offset="100%" stop-color="#111A2E"/>
-    </linearGradient>
-    <radialGradient id="glowTeal" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(170 60) rotate(25) scale(340 210)">
-      <stop offset="0%" stop-color="#14B8A6" stop-opacity="0.22"/>
-      <stop offset="100%" stop-color="#14B8A6" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="glowSky" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(765 138) rotate(-15) scale(220 180)">
-      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.18"/>
-      <stop offset="65%" stop-color="#A78BFA" stop-opacity="0.08"/>
-      <stop offset="100%" stop-color="#090D16" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="nameGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#F8FAFC"/>
-      <stop offset="38%" stop-color="#E2E8F0"/>
-      <stop offset="50%" stop-color="#5EEAD4"/>
-      <stop offset="62%" stop-color="#E2E8F0"/>
-      <stop offset="100%" stop-color="#F8FAFC"/>
-      <animate attributeName="x1" values="-100%;100%" dur="5.5s" repeatCount="indefinite"/>
-      <animate attributeName="x2" values="0%;200%" dur="5.5s" repeatCount="indefinite"/>
-    </linearGradient>
-    <linearGradient id="railBeam" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#14B8A6" stop-opacity="0"/>
-      <stop offset="30%" stop-color="#14B8A6" stop-opacity="0.9"/>
-      <stop offset="65%" stop-color="#38BDF8" stop-opacity="1"/>
-      <stop offset="88%" stop-color="#F59E0B" stop-opacity="0.95"/>
-      <stop offset="100%" stop-color="#F59E0B" stop-opacity="0"/>
-    </linearGradient>
-    <linearGradient id="radarSweep" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#14B8A6" stop-opacity="0.48"/>
-      <stop offset="100%" stop-color="#14B8A6" stop-opacity="0"/>
-    </linearGradient>
-    <pattern id="dotGrid" width="24" height="24" patternUnits="userSpaceOnUse">
-      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.35"/>
-    </pattern>
-    <clipPath id="heroClip">
-      <rect x="1" y="1" width="898" height="276" rx="16"/>
-    </clipPath>
-    <style>
-      .mono { font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-      .sans { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }
-    </style>
-  </defs>
-
-  <g clip-path="url(#heroClip)">
-    <rect x="0" y="0" width="900" height="278" fill="url(#heroBg)"/>
-    <rect x="0" y="0" width="900" height="278" fill="url(#dotGrid)"/>
-    <rect x="0" y="0" width="900" height="278" fill="url(#glowTeal)"/>
-    <rect x="0" y="0" width="900" height="278" fill="url(#glowSky)"/>
-
-    <!-- Subtle aerospace technical hairlines -->
-    <line x1="0" y1="54" x2="900" y2="54" stroke="#1E293B" stroke-width="1" opacity="0.65"/>
-    <line x1="636" y1="0" x2="636" y2="278" stroke="#1E293B" stroke-width="1" stroke-dasharray="4 6" opacity="0.55"/>
-
-    <!-- Top telemetry strip -->
-    <g transform="translate(34, 16)">
-      <rect x="0" y="0" width="268" height="23" rx="11.5" fill="#0F1D2C" stroke="#1E3A5F" stroke-width="1"/>
-      <circle cx="15" cy="11.5" r="4" fill="#10B981">
-        <animate attributeName="opacity" values="1;0.3;1" dur="1.8s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="15" cy="11.5" r="7" fill="#10B981" opacity="0.25">
-        <animate attributeName="r" values="4;9;4" dur="1.8s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="0.35;0;0.35" dur="1.8s" repeatCount="indefinite"/>
-      </circle>
-      <text x="28" y="15" class="mono" font-size="10.5" font-weight="600" fill="#5EEAD4" letter-spacing="0.8">SYSTEMS ONLINE · BENGALURU, IN</text>
-    </g>
-
-    <text x="866" y="31" text-anchor="end" class="mono" font-size="10.5" fill="#64748B" letter-spacing="1.2">ORBITAL // AI // SECURITY // MOBILE</text>
-
-    <!-- Main Hero Typography -->
-    <text x="34" y="124" class="sans" font-size="50" font-weight="800" fill="url(#nameGrad)" letter-spacing="1.5">AMOGH V K</text>
-
-    <text x="36" y="156" class="sans" font-size="16" font-weight="500" fill="#CBD5E1">
-      Software, AI &amp; Agents, Security, Flutter &amp; Aerospace Systems Engineer
-    </text>
-
-    <text x="36" y="182" class="mono" font-size="11.5" fill="#94A3B8">
-      From ESP32 firmware &amp; CubeSat ADCS to agentic AI, security &amp; Flutter systems.
-    </text>
-
-    <!-- Structured Credential Pills (generous width, zero overlap) -->
-    <g transform="translate(34, 208)">
-      <rect x="0" y="0" width="174" height="28" rx="7" fill="#132238" stroke="#1E3A5F" stroke-width="1"/>
-      <circle cx="13" cy="14" r="3" fill="#F59E0B"/>
-      <text x="23" y="18" class="mono" font-size="10" font-weight="600" fill="#FDE68A">Founder · EvenEi &amp; TDC</text>
-
-      <rect x="182" y="0" width="122" height="28" rx="7" fill="#1F1522" stroke="#4C1D3D" stroke-width="1"/>
-      <circle cx="195" cy="14" r="3" fill="#FB7185"/>
-      <text x="205" y="18" class="mono" font-size="10" font-weight="600" fill="#FECDD3">IAF · HAWKEYE</text>
-
-      <rect x="312" y="0" width="146" height="28" rx="7" fill="#0F2429" stroke="#155E75" stroke-width="1"/>
-      <circle cx="325" cy="14" r="3" fill="#2DD4BF"/>
-      <text x="335" y="18" class="mono" font-size="10" font-weight="600" fill="#99F6E4">UNOOSA / KiboCUBE</text>
-
-      <rect x="466" y="0" width="126" height="28" rx="7" fill="#1A1833" stroke="#3B3278" stroke-width="1"/>
-      <circle cx="479" cy="14" r="3" fill="#A78BFA"/>
-      <text x="489" y="18" class="mono" font-size="10" font-weight="600" fill="#DDD6FE">Google GSA '26</text>
-    </g>
-
-    <!-- Right-side Animated Orbital CubeSat + Radar Telemetry Display -->
-    <g transform="translate(768, 160)">
-      <circle cx="0" cy="0" r="82" stroke="#1E293B" stroke-width="1" stroke-dasharray="3 5"/>
-      <circle cx="0" cy="0" r="57" stroke="#1E3A5F" stroke-width="1" opacity="0.85"/>
-      <circle cx="0" cy="0" r="31" stroke="#14B8A6" stroke-width="1" stroke-dasharray="2 4" opacity="0.55"/>
-      <line x1="-88" y1="0" x2="88" y2="0" stroke="#1E293B" stroke-width="1" opacity="0.6"/>
-      <line x1="0" y1="-88" x2="0" y2="88" stroke="#1E293B" stroke-width="1" opacity="0.6"/>
-
-      <!-- Rotating radar sweep sector -->
-      <g>
-        <path d="M 0 0 L 0 -80 A 80 80 0 0 1 63 -49 Z" fill="url(#radarSweep)"/>
-        <line x1="0" y1="0" x2="0" y2="-80" stroke="#2DD4BF" stroke-width="1.4" opacity="0.8"/>
-        <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="8s" repeatCount="indefinite"/>
-      </g>
-
-      <!-- Tilted CubeSat orbital ring -->
-      <g transform="rotate(-24)">
-        <ellipse cx="0" cy="0" rx="76" ry="27" stroke="#38BDF8" stroke-width="1.2" stroke-opacity="0.45" stroke-dasharray="5 4"/>
-        <circle cx="0" cy="0" r="4.5" fill="#FBBF24">
-          <animateMotion dur="6.5s" repeatCount="indefinite" path="M 76,0 A 76,27 0 1,1 -76,0 A 76,27 0 1,1 76,0"/>
-        </circle>
-        <circle cx="0" cy="0" r="9" fill="#FBBF24" opacity="0.28">
-          <animateMotion dur="6.5s" repeatCount="indefinite" path="M 76,0 A 76,27 0 1,1 -76,0 A 76,27 0 1,1 76,0"/>
-        </circle>
-      </g>
-
-      <!-- Secondary counter-orbiting node -->
-      <g transform="rotate(32)">
-        <ellipse cx="0" cy="0" rx="58" ry="20" stroke="#A78BFA" stroke-width="1" stroke-opacity="0.35"/>
-        <circle cx="0" cy="0" r="3" fill="#38BDF8">
-          <animateMotion dur="9s" repeatCount="indefinite" path="M -58,0 A 58,20 0 1,0 58,0 A 58,20 0 1,0 -58,0"/>
-        </circle>
-      </g>
-
-      <!-- Core node -->
-      <circle cx="0" cy="0" r="10.5" fill="#0F172A" stroke="#14B8A6" stroke-width="1.8"/>
-      <circle cx="0" cy="0" r="4" fill="#5EEAD4">
-        <animate attributeName="opacity" values="1;0.35;1" dur="2.1s" repeatCount="indefinite"/>
-      </circle>
-
-      <!-- Radar ping targets -->
-      <circle cx="38" cy="-31" r="2.6" fill="#FB7185">
-        <animate attributeName="opacity" values="0.15;1;0.15" dur="4s" begin="0.8s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="-44" cy="25" r="2.6" fill="#38BDF8">
-        <animate attributeName="opacity" values="0.15;1;0.15" dur="4s" begin="2.4s" repeatCount="indefinite"/>
-      </circle>
-
-      <text x="0" y="99" text-anchor="middle" class="mono" font-size="9.5" fill="#64748B" letter-spacing="1.4">ADCS // B-DOT // FOD-FUSION</text>
-    </g>
-
-    <!-- Bottom continuous animated scanning progress rail -->
-    <rect x="0" y="274" width="900" height="4" fill="#162032"/>
-    <rect x="-260" y="274" width="260" height="4" fill="url(#railBeam)">
-      <animate attributeName="x" from="-260" to="920" dur="3.4s" repeatCount="indefinite"/>
-    </rect>
-  </g>
-
-  <rect x="1" y="1" width="898" height="276" rx="16" stroke="#243247" stroke-width="1.2"/>
-</svg>
-"""
-
-
-def generate_divider() -> str:
-    return """<svg width="900" height="18" viewBox="0 0 900 18" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated section divider">
-  <defs>
-    <linearGradient id="divBeam" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#14B8A6" stop-opacity="0"/>
-      <stop offset="35%" stop-color="#14B8A6" stop-opacity="0.95"/>
-      <stop offset="65%" stop-color="#38BDF8" stop-opacity="1"/>
-      <stop offset="88%" stop-color="#F59E0B" stop-opacity="0.85"/>
-      <stop offset="100%" stop-color="#F59E0B" stop-opacity="0"/>
-    </linearGradient>
-    <clipPath id="divClip">
-      <rect x="0" y="7" width="900" height="4" rx="2"/>
-    </clipPath>
-  </defs>
-  <rect x="0" y="8" width="900" height="2" rx="1" fill="#1E293B"/>
-  <g clip-path="url(#divClip)">
-    <rect x="-220" y="7" width="220" height="4" fill="url(#divBeam)">
-      <animate attributeName="x" from="-220" to="920" dur="3.8s" repeatCount="indefinite"/>
-    </rect>
-  </g>
-  <polygon points="450,3 456,9 450,15 444,9" fill="#0F172A" stroke="#14B8A6" stroke-width="1.2"/>
-  <circle cx="450" cy="9" r="2" fill="#5EEAD4">
-    <animate attributeName="opacity" values="0.35;1;0.35" dur="2.2s" repeatCount="indefinite"/>
-  </circle>
-</svg>
-"""
-
-
-def generate_terminal_card(metrics: dict) -> str:
-    # Verified baseline of 1,073 across public + private repos; auto-grows when public+private exceeds it
+def generate_hero_editorial(metrics: dict) -> str:
     total_all = max(metrics["total_contributions"], 1073)
-    contribs = f"{total_all:,}+"
-    kpis = [
-        (contribs, "Total Contribs (26 Repos)", "#14B8A6", "#0F2929"),
-        ("10,000+", "Vets via Vetifi AI", "#38BDF8", "#0E2235"),
-        ("1,000+", "TDC Builders (5+ Univ)", "#A78BFA", "#1C1836"),
-        ("0.261s", "TRACE 189-File Audit", "#2DD4BF", "#0E2926"),
-        ("96.23%", "RAG Eval Accuracy", "#FBBF24", "#2B2110"),
-        ("70%", "Faster MIT KPI Sync", "#FB7185", "#2B141F"),
-    ]
+    contribs_fmt = f"{total_all:,}+"
 
-    kpi_svg = []
-    for idx, (val, label, accent, tint) in enumerate(kpis):
-        col = idx % 2
-        row = idx // 2
-        kx = 576 + col * 156
-        ky = 58 + row * 74
-        delay = 0.2 * idx
-        kpi_svg.append(f"""
-    <g transform="translate({kx}, {ky})">
-      <rect x="0" y="0" width="146" height="64" rx="10" fill="{tint}" stroke="#243247" stroke-width="1"/>
-      <rect x="0" y="0" width="146" height="3" rx="1.5" fill="{accent}" opacity="0.85">
-        <animate attributeName="opacity" values="0.45;1;0.45" begin="{delay:.1f}s" dur="3.0s" repeatCount="indefinite"/>
-      </rect>
-      <text x="13" y="31" class="sans" font-size="20" font-weight="800" fill="#F8FAFC">{esc(val)}</text>
-      <text x="13" y="50" class="mono" font-size="9.2" fill="#94A3B8">{esc(label)}</text>
-    </g>""")
-
-    return f"""<svg width="900" height="296" viewBox="0 0 900 296" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amogh V K developer terminal and verified impact telemetry">
+    return f"""<svg width="900" height="456" viewBox="0 0 900 456" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amogh V K — Quiet Studio Editorial Profile">
   <defs>
-    <linearGradient id="termBg" x1="0" y1="0" x2="900" y2="296" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0B1120"/>
-      <stop offset="100%" stop-color="#0F172A"/>
-    </linearGradient>
+    <clipPath id="heroFrame">
+      <rect x="1" y="1" width="898" height="454" rx="18"/>
+    </clipPath>
     <style>
-      .mono {{ font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }}
-      .sans {{ font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }}
+      .serif {{ font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif; }}
+      .sans {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }}
+      .mono {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }}
     </style>
   </defs>
 
-  <rect x="1" y="1" width="898" height="294" rx="14" fill="url(#termBg)" stroke="#243247" stroke-width="1.2"/>
+  <g clip-path="url(#heroFrame)">
+    <!-- Warm cotton paper canvas -->
+    <rect x="0" y="0" width="900" height="456" fill="{PAPER}"/>
 
-  <!-- Left Terminal Window (generous 546px width) -->
-  <rect x="14" y="14" width="546" height="268" rx="11" fill="#090D16" stroke="#1E293B" stroke-width="1"/>
-  <path d="M 14 25 A 11 11 0 0 1 25 14 L 549 14 A 11 11 0 0 1 560 25 L 560 44 L 14 44 Z" fill="#131B2E"/>
-  <line x1="14" y1="44" x2="560" y2="44" stroke="#1E293B" stroke-width="1"/>
-  <circle cx="32" cy="29" r="5" fill="#EF4444"/>
-  <circle cx="48" cy="29" r="5" fill="#F59E0B"/>
-  <circle cx="64" cy="29" r="5" fill="#10B981"/>
-  <text x="287" y="33" text-anchor="middle" class="mono" font-size="10.8" fill="#64748B">amogh@evenei:~/systems — zsh</text>
+    <!-- 4-column quiet vertical hairline grid (straight from amogh.evenei.com) -->
+    <line x1="225" y1="48" x2="225" y2="456" stroke="{INK}" stroke-opacity="0.045" stroke-width="1"/>
+    <line x1="450" y1="48" x2="450" y2="456" stroke="{INK}" stroke-opacity="0.045" stroke-width="1"/>
+    <line x1="675" y1="48" x2="675" y2="456" stroke="{INK}" stroke-opacity="0.045" stroke-width="1"/>
 
-  <!-- Terminal Body (sized cleanly to stay well inside 560px) -->
-  <g class="mono" font-size="10.6">
-    <text x="28" y="69">
-      <tspan fill="#14B8A6">➜</tspan>
-      <tspan fill="#38BDF8"> ~/systems</tspan>
-      <tspan fill="#E2E8F0"> cat identity.json</tspan>
-    </text>
-
-    <text x="28" y="92" fill="#64748B">{{</text>
-    <text x="40" y="112"><tspan fill="#38BDF8">"ventures"</tspan><tspan fill="#94A3B8">: </tspan><tspan fill="#FDE68A">["EvenEi (Specular)", "The Developer Community"]</tspan><tspan fill="#64748B">,</tspan></text>
-    <text x="40" y="132"><tspan fill="#38BDF8">"defense_space"</tspan><tspan fill="#94A3B8">: </tspan><tspan fill="#5EEAD4">["IAF (HAWKEYE)", "UNOOSA / JAXA KiboCUBE"]</tspan><tspan fill="#64748B">,</tspan></text>
-    <text x="40" y="152"><tspan fill="#38BDF8">"engineering"</tspan><tspan fill="#94A3B8">: </tspan><tspan fill="#DDD6FE">["Vetifi AI (10k+ vets)", "MIT BLR Data Systems"]</tspan><tspan fill="#64748B">,</tspan></text>
-    <text x="40" y="172"><tspan fill="#38BDF8">"education"</tspan><tspan fill="#94A3B8">: </tspan><tspan fill="#CBD5E1">"B.Tech ECE · MIT Bengaluru · AICTE Scholar"</tspan><tspan fill="#64748B">,</tspan></text>
-    <text x="40" y="192"><tspan fill="#38BDF8">"principle"</tspan><tspan fill="#94A3B8">: </tspan><tspan fill="#86EFAC">"Deterministic verification · Systems over demos"</tspan><tspan fill="#64748B">,</tspan></text>
-    <text x="40" y="212"><tspan fill="#38BDF8">"motto"</tspan><tspan fill="#94A3B8">: </tspan><tspan fill="#FECDD3">"What people find boring, is what interests me."</tspan></text>
-    <text x="28" y="232" fill="#64748B">}}</text>
-
-    <text x="28" y="261">
-      <tspan fill="#14B8A6">➜</tspan>
-      <tspan fill="#38BDF8"> ~/systems</tspan>
-      <tspan fill="#E2E8F0"> ./ship --verify=deterministic --stage=prod</tspan>
-    </text>
-    <rect x="387" y="249" width="8" height="14.5" rx="1.5" fill="#14B8A6">
-      <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.49;0.5;1" dur="1.05s" repeatCount="indefinite"/>
+    <!-- Subtle drifting flat Bauhaus geometric forms in background (KineticShapes.jsx) -->
+    <circle cx="38" cy="144" r="14" fill="{SKY}" opacity="0.34">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,-7; 0,0" dur="9s" repeatCount="indefinite"/>
+    </circle>
+    <rect x="336" y="96" width="16" height="16" rx="4" fill="{MARIGOLD}" opacity="0.38">
+      <animateTransform attributeName="transform" type="rotate" values="0 344 104; 90 344 104; 0 344 104" dur="14s" repeatCount="indefinite"/>
     </rect>
+    <path d="M 488 268 V 252 A 13 13 0 0 1 514 252 V 268 Z" fill="{SAGE}" opacity="0.42">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,6; 0,0" dur="10s" repeatCount="indefinite"/>
+    </path>
+    <rect x="846" y="294" width="34" height="14" rx="7" fill="{ROSE}" opacity="0.48">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -6,0; 0,0" dur="11s" repeatCount="indefinite"/>
+    </rect>
+    <circle cx="526" cy="96" r="16" fill="none" stroke="{INK_MUTED}" stroke-width="1.2" opacity="0.24">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 4,5; 0,0" dur="12s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Quiet Editorial Masthead Bar -->
+    <rect x="0" y="0" width="900" height="48" fill="{PAPER}"/>
+    <line x1="0" y1="48" x2="900" y2="48" stroke="{LINE}" stroke-width="1"/>
+    <!-- Animated terracotta scroll hairline (exact scroll-hairline motif from portfolio) -->
+    <rect x="0" y="47" width="180" height="1.8" fill="{CORAL}">
+      <animate attributeName="x" values="0;720;0" dur="11s" calcMode="spline" keySplines="0.42 0 0.58 1; 0.42 0 0.58 1" repeatCount="indefinite"/>
+    </rect>
+
+    <text x="36" y="30" class="serif" font-size="19" font-weight="500" fill="{INK}">Amogh VK<tspan fill="{CORAL}">.</tspan></text>
+
+    <g class="sans" font-size="9.5" font-weight="500" fill="{INK_SOFT}" letter-spacing="1.7">
+      <text x="415" y="28">WORK</text>
+      <text x="478" y="28">PROGRESS</text>
+      <text x="568" y="28">CRAFT</text>
+      <text x="636" y="28">WRITING</text>
+    </g>
+
+    <!-- Top-right solid ink Resume / Portfolio pill -->
+    <rect x="760" y="12" width="104" height="24" rx="12" fill="{INK}"/>
+    <text x="812" y="27.5" text-anchor="middle" class="sans" font-size="9.5" font-weight="500" fill="{PAPER}" letter-spacing="1.3">PORTFOLIO ↗</text>
+
+    <!-- HERO LEFT COLUMN -->
+    <text x="36" y="88" class="sans" font-size="10" font-weight="600" fill="{INK_MUTED}" letter-spacing="2.1">ENGINEERING, AI AND PRODUCT</text>
+
+    <text x="34" y="152" class="serif" font-size="60" font-weight="400" fill="{INK}" letter-spacing="-1">Amogh <tspan font-style="italic" fill="{CORAL}">VK.</tspan></text>
+
+    <text x="36" y="186" class="sans" font-size="20.5" font-weight="400" fill="{INK}" letter-spacing="-0.3">I turn ambitious ideas into useful</text>
+    <text x="36" y="212" class="sans" font-size="20.5" font-weight="400" fill="{INK}" letter-spacing="-0.3">technology and ventures.</text>
+
+    <text x="36" y="242" class="sans" font-size="13" fill="{INK_SOFT}">Founder of EvenEi and The Developer Community, studying ECE at MIT Bengaluru.</text>
+    <text x="36" y="261" class="sans" font-size="13" fill="{INK_SOFT}">Building across software, AI, hardware, security, and spacecraft systems.</text>
+
+    <!-- Editorial Clean Pills (.btn-ink & .btn-clean) -->
+    <g transform="translate(36, 282)">
+      <rect x="0" y="0" width="194" height="32" rx="16" fill="{INK}"/>
+      <text x="97" y="19.5" text-anchor="middle" class="sans" font-size="10" font-weight="500" fill="{PAPER}" letter-spacing="1.3">AMOGH.EVENEI.COM  ↗</text>
+
+      <rect x="206" y="0" width="198" height="32" rx="16" fill="{PAPER}" stroke="{LINE_STRONG}" stroke-width="1"/>
+      <text x="305" y="19.5" text-anchor="middle" class="sans" font-size="10" font-weight="500" fill="{INK_SOFT}" letter-spacing="1.3">BENGALURU, INDIA · 12.97° N</text>
+    </g>
+
+    <!-- HERO RIGHT COLUMN: Animated Quiet Studio Constellation Plate (SectionArt.jsx) -->
+    <g transform="translate(556, 72)">
+      <rect x="0" y="0" width="308" height="242" rx="14" fill="{PAPER_DEEP}" stroke="{LINE_STRONG}" stroke-width="1"/>
+
+      <!-- Plate top window bar -->
+      <line x1="0" y1="30" x2="308" y2="30" stroke="{LINE}" stroke-width="1"/>
+      <circle cx="16" cy="15" r="3.5" fill="{CORAL_SOFT}"/>
+      <circle cx="28" cy="15" r="3.5" fill="{MARIGOLD}"/>
+      <circle cx="40" cy="15" r="3.5" fill="{SAGE}"/>
+      <text x="154" y="18.5" text-anchor="middle" class="sans" font-size="9.5" font-weight="600" fill="{INK_SOFT}" letter-spacing="1.5">SYSTEMS CONSTELLATION</text>
+      <text x="294" y="18.5" text-anchor="end" class="mono" font-size="9" fill="{INK_MUTED}">04</text>
+
+      <!-- Systems Constellation artwork (exact geometry from SectionArt.jsx) -->
+      <g transform="translate(0, 26)">
+        <circle cx="154" cy="84" r="64" fill="none" stroke="{INK}" stroke-opacity="0.16" stroke-width="1" stroke-dasharray="3 6">
+          <animateTransform attributeName="transform" type="rotate" from="0 154 84" to="360 154 84" dur="44s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="154" cy="84" r="35" fill="none" stroke="{INK}" stroke-opacity="0.12" stroke-width="1"/>
+
+        <!-- Connecting lines -->
+        <path d="M 86 48 L 210 38 L 228 118 L 100 128 Z" fill="none" stroke="{INK}" stroke-opacity="0.24" stroke-width="1"/>
+        <line x1="86" y1="48" x2="228" y2="118" stroke="{INK}" stroke-opacity="0.12" stroke-width="1"/>
+        <line x1="210" y1="38" x2="100" y2="128" stroke="{INK}" stroke-opacity="0.12" stroke-width="1"/>
+
+        <!-- Animated ink traveler moving quietly along the constellation edges -->
+        <circle cx="0" cy="0" r="3.4" fill="{INK}">
+          <animateMotion dur="9.5s" repeatCount="indefinite" path="M 86,48 L 210,38 L 228,118 L 100,128 Z"/>
+        </circle>
+
+        <!-- 4 flat solid pastel principle nodes -->
+        <circle cx="86" cy="48" r="15" fill="{CORAL_SOFT}">
+          <animate attributeName="r" values="14.5;16.5;14.5" dur="5.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="86" cy="48" r="20" fill="none" stroke="{INK}" stroke-opacity="0.18" stroke-width="0.9"/>
+
+        <circle cx="210" cy="38" r="13" fill="{SKY}">
+          <animate attributeName="r" values="12.5;14.2;12.5" begin="1.2s" dur="5.6s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="210" cy="38" r="18" fill="none" stroke="{INK}" stroke-opacity="0.14" stroke-width="0.9"/>
+
+        <circle cx="228" cy="118" r="16" fill="{MARIGOLD}">
+          <animate attributeName="r" values="15.5;17.2;15.5" begin="2.4s" dur="5.0s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="228" cy="118" r="21" fill="none" stroke="{INK}" stroke-opacity="0.14" stroke-width="0.9"/>
+
+        <circle cx="100" cy="128" r="13.5" fill="{SAGE}">
+          <animate attributeName="r" values="13;14.8;13" begin="3.6s" dur="5.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="100" cy="128" r="18.5" fill="none" stroke="{INK}" stroke-opacity="0.14" stroke-width="0.9"/>
+
+        <!-- Center paper diamond -->
+        <rect x="148" y="78" width="12" height="12" rx="2" fill="{PAPER}" stroke="{INK}" stroke-width="1" transform="rotate(45 154 84)"/>
+
+        <!-- Crisp micro node captions -->
+        <text x="58" y="25" class="sans" font-size="8.5" font-weight="600" fill="{INK_SOFT}" letter-spacing="1.2">SYSTEMS</text>
+        <text x="228" y="21" class="sans" font-size="8.5" font-weight="600" fill="{INK_SOFT}" letter-spacing="1.2">LIMITS</text>
+        <text x="234" y="153" text-anchor="middle" class="sans" font-size="8.5" font-weight="600" fill="{INK_SOFT}" letter-spacing="1.2">PROOF</text>
+        <text x="64" y="153" class="sans" font-size="8.5" font-weight="600" fill="{INK_SOFT}" letter-spacing="1.2">CLARITY</text>
+      </g>
+
+      <!-- Bottom integrated damped B-dot oscillation strip -->
+      <line x1="0" y1="196" x2="308" y2="196" stroke="{LINE}" stroke-width="1"/>
+      <line x1="18" y1="219" x2="290" y2="219" stroke="{INK}" stroke-opacity="0.16" stroke-width="0.9"/>
+      <path d="M 18 219 C 42 199, 64 239, 90 219 C 114 203, 138 234, 166 219 C 190 210, 214 226, 240 219 C 258 216, 274 220, 290 219" fill="none" stroke="{INK}" stroke-width="1.25"/>
+      <circle cx="0" cy="0" r="3.2" fill="{CORAL}">
+        <animateMotion dur="5.8s" repeatCount="indefinite" path="M 18,219 C 42,199 64,239 90,219 C 114,203 138,234 166,219 C 190,210 214,226 240,219 C 258,216 274,220 290,219"/>
+      </circle>
+      <circle cx="264" cy="219" r="7.5" fill="{SKY}" opacity="0.55">
+        <animate attributeName="r" values="6;9;6" dur="2.8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="264" cy="219" r="2.5" fill="{INK}"/>
+    </g>
+
+    <!-- INTEGRATED 4-COLUMN EDITORIAL IMPACT BAND (1:1 match with portfolio) -->
+    <line x1="0" y1="342" x2="900" y2="342" stroke="{LINE}" stroke-width="1"/>
+    <line x1="225" y1="342" x2="225" y2="456" stroke="{LINE}" stroke-width="1"/>
+    <line x1="450" y1="342" x2="450" y2="456" stroke="{LINE}" stroke-width="1"/>
+    <line x1="675" y1="342" x2="675" y2="456" stroke="{LINE}" stroke-width="1"/>
+
+    <g transform="translate(36, 388)">
+      <text x="0" y="0" class="serif" font-size="33" font-weight="400" fill="{INK}">{esc(contribs_fmt)}</text>
+      <text x="0" y="22" class="sans" font-size="9.5" font-weight="600" fill="{INK}" letter-spacing="1.6">GITHUB CONTRIBUTIONS</text>
+      <text x="0" y="39" class="sans" font-size="11" fill="{INK_SOFT}">1,046 commits across 26+ repos</text>
+    </g>
+
+    <g transform="translate(249, 388)">
+      <text x="0" y="0" class="serif" font-size="33" font-weight="400" fill="{INK}">10,000+</text>
+      <text x="0" y="22" class="sans" font-size="9.5" font-weight="600" fill="{INK}" letter-spacing="1.6">ACTIVE VETERINARIANS</text>
+      <text x="0" y="39" class="sans" font-size="11" fill="{INK_SOFT}">Served via Vetifi AI workflows</text>
+    </g>
+
+    <g transform="translate(474, 388)">
+      <text x="0" y="0" class="serif" font-size="33" font-weight="400" fill="{INK}">1,000+</text>
+      <text x="0" y="22" class="sans" font-size="9.5" font-weight="600" fill="{INK}" letter-spacing="1.6">TDC REGISTRATIONS</text>
+      <text x="0" y="39" class="sans" font-size="11" fill="{INK_SOFT}">Builders across 5+ universities</text>
+    </g>
+
+    <g transform="translate(699, 388)">
+      <text x="0" y="0" class="serif" font-size="33" font-weight="400" fill="{INK}">0.261s</text>
+      <text x="0" y="22" class="sans" font-size="9.5" font-weight="600" fill="{INK}" letter-spacing="1.6">TRACE LOCAL AUDIT</text>
+      <text x="0" y="39" class="sans" font-size="11" fill="{INK_SOFT}">189 files, 39 endpoints, 0 tokens</text>
+    </g>
   </g>
 
-  <!-- Right KPI Header -->
-  <text x="576" y="36" class="mono" font-size="11.5" font-weight="700" fill="#CBD5E1" letter-spacing="1.2">VERIFIED IMPACT METRICS</text>
-  <circle cx="874" cy="32" r="4" fill="#14B8A6">
-    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
-  </circle>
-
-  {''.join(kpi_svg)}
+  <rect x="1" y="1" width="898" height="454" rx="18" stroke="{LINE_STRONG}" stroke-width="1"/>
 </svg>
 """
 
 
-def generate_progress_bars(metrics: dict, chrono: dict) -> str:
+def generate_editorial_rule() -> str:
+    return f"""<svg width="900" height="20" viewBox="0 0 900 20" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Editorial hairline rule">
+  <line x1="0" y1="10" x2="900" y2="10" stroke="{LINE_STRONG}" stroke-width="1"/>
+  <g>
+    <rect x="0" y="9" width="76" height="2" fill="{CORAL}"/>
+    <circle cx="38" cy="10" r="3" fill="{PAPER}" stroke="{CORAL}" stroke-width="1.3"/>
+    <animateTransform attributeName="transform" type="translate" values="60,0; 764,0; 60,0" dur="12s" calcMode="spline" keySplines="0.42 0 0.58 1; 0.42 0 0.58 1" repeatCount="indefinite"/>
+  </g>
+</svg>
+"""
+
+
+def render_poster_card(
+    uid: str,
+    name: str,
+    year: str,
+    line1: str,
+    line2: str,
+    tagline1: str,
+    tagline2: str,
+    footer: str,
+    bg: str,
+    bg_shapes_svg: str,
+    motif_svg: str,
+) -> str:
+    return f"""<svg width="440" height="252" viewBox="0 0 440 252" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{esc(name)} — {esc(line1)} {esc(line2)}">
+  <defs>
+    <clipPath id="pclip_{uid}">
+      <rect x="1" y="1" width="438" height="250" rx="16"/>
+    </clipPath>
+    <style>
+      .serif {{ font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif; }}
+      .sans {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }}
+    </style>
+  </defs>
+
+  <g clip-path="url(#pclip_{uid})">
+    <rect x="0" y="0" width="440" height="252" fill="{bg}"/>
+
+    <!-- Flat drifting Bauhaus solid forms (straight from Poster.jsx) -->
+    {bg_shapes_svg}
+
+    <!-- Top meta bar -->
+    <text x="26" y="30" class="sans" font-size="9.5" font-weight="600" fill="{INK}" fill-opacity="0.72" letter-spacing="1.7">{esc(name.upper())}</text>
+    <text x="414" y="30" text-anchor="end" class="sans" font-size="9.5" font-weight="600" fill="{INK}" fill-opacity="0.72" letter-spacing="1.5">{esc(year)}</text>
+
+    <!-- Two-line editorial serif headline (second line italic!) -->
+    <text x="26" y="102" class="serif" font-size="34" font-weight="400" fill="{INK}" letter-spacing="-0.6">{esc(line1)}</text>
+    <text x="26" y="138" class="serif" font-size="34" font-weight="400" font-style="italic" fill="{INK}" letter-spacing="-0.6">{esc(line2)}</text>
+
+    <!-- Concise tagline -->
+    <text x="26" y="166" class="sans" font-size="11.5" fill="{INK}" fill-opacity="0.78">{esc(tagline1)}</text>
+    <text x="26" y="182" class="sans" font-size="11.5" fill="{INK}" fill-opacity="0.78">{esc(tagline2)}</text>
+
+    <!-- Bespoke animated architectural vector motif on right -->
+    <g transform="translate(274, 62)">
+      <rect x="0" y="0" width="140" height="122" rx="12" fill="{PAPER}" fill-opacity="0.88" stroke="{INK}" stroke-opacity="0.22" stroke-width="1"/>
+      {motif_svg}
+    </g>
+
+    <!-- Bottom editorial footer & arrow -->
+    <line x1="26" y1="214" x2="414" y2="214" stroke="{INK}" stroke-opacity="0.16" stroke-width="1"/>
+    <text x="26" y="234" class="sans" font-size="9.5" font-weight="600" fill="{INK}" fill-opacity="0.76" letter-spacing="1.6">{esc(footer.upper())}</text>
+    <text x="414" y="235" text-anchor="end" class="sans" font-size="15" font-weight="400" fill="{INK}">↗</text>
+  </g>
+
+  <rect x="1" y="1" width="438" height="250" rx="16" stroke="{INK}" stroke-opacity="0.14" stroke-width="1"/>
+</svg>
+"""
+
+
+def generate_posters() -> dict[str, str]:
+    posters = {}
+
+    # 1. TRACE — Seaglass #A9CCC4
+    posters["poster-trace.svg"] = render_poster_card(
+        uid="trace",
+        name="TRACE",
+        year="2026",
+        line1="Security that",
+        line2="proves itself.",
+        tagline1="Local-first AST & Attack-Path scanner.",
+        tagline2="0.261s · 189 files · 0 tokens · MCP",
+        footer="Parse, model, verify",
+        bg=SEAGLASS,
+        bg_shapes_svg=f"""
+        <rect x="278" y="-36" width="128" height="270" rx="64" fill="{CORAL_SOFT}">
+          <animateTransform attributeName="transform" type="translate" values="0,0; 0,10; 0,0" dur="10s" repeatCount="indefinite"/>
+        </rect>
+        <circle cx="22" cy="242" r="72" fill="{PAPER}" opacity="0.58"/>
+        <rect x="336" y="198" width="90" height="62" rx="10" fill="{MARIGOLD}"/>""",
+        motif_svg=f"""
+        <line x1="22" y1="61" x2="62" y2="34" stroke="{INK}" stroke-opacity="0.3" stroke-width="1.2"/>
+        <line x1="22" y1="61" x2="62" y2="88" stroke="{INK}" stroke-opacity="0.3" stroke-width="1.2"/>
+        <line x1="62" y1="34" x2="100" y2="61" stroke="{INK}" stroke-opacity="0.3" stroke-width="1.2"/>
+        <line x1="62" y1="88" x2="100" y2="61" stroke="{INK}" stroke-opacity="0.3" stroke-width="1.2"/>
+        <line x1="100" y1="61" x2="124" y2="61" stroke="{CORAL}" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <circle cx="0" cy="0" r="3.6" fill="{CORAL}">
+          <animateMotion dur="3.4s" repeatCount="indefinite" path="M 22,61 L 62,34 L 100,61 L 124,61"/>
+        </circle>
+        <circle cx="22" cy="61" r="7" fill="{SEAGLASS}" stroke="{INK}" stroke-width="1"/>
+        <circle cx="62" cy="34" r="6" fill="{MARIGOLD}" stroke="{INK}" stroke-width="1"/>
+        <circle cx="62" cy="88" r="6" fill="{SKY}" stroke="{INK}" stroke-width="1"/>
+        <rect x="92" y="53" width="16" height="16" rx="4" fill="{PAPER}" stroke="{INK}" stroke-width="1"/>
+        <circle cx="124" cy="61" r="7.5" fill="{CORAL_SOFT}" stroke="{INK}" stroke-width="1"/>
+        <text x="12" y="112" class="sans" font-size="8" font-weight="600" fill="{INK_MUTED}" letter-spacing="1.2">APM · 100% RECALL</text>""",
+    )
+
+    # 2. SPECULAR — Sage #BACFAE
+    posters["poster-specular.svg"] = render_poster_card(
+        uid="specular",
+        name="Specular · EvenEi",
+        year="2024–2026",
+        line1="Memory,",
+        line2="worn lightly.",
+        tagline1="AI smart glasses · ESP32-S3 + Flutter.",
+        tagline2="$1K seed · Google / Antler Immersion",
+        footer="Glasses, phone, cloud",
+        bg=SAGE,
+        bg_shapes_svg=f"""
+        <circle cx="352" cy="116" r="106" fill="{ROSE}">
+          <animateTransform attributeName="transform" type="translate" values="0,0; -7,6; 0,0" dur="11s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="-18" y="196" width="128" height="72" rx="36" fill="{PAPER}" opacity="0.62"/>
+        <rect x="318" y="194" width="108" height="66" rx="12" fill="{SKY}"/>""",
+        motif_svg=f"""
+        <rect x="16" y="38" width="44" height="30" rx="15" fill="{SAGE}" fill-opacity="0.55" stroke="{INK}" stroke-width="1.1"/>
+        <rect x="80" y="38" width="44" height="30" rx="15" fill="{MARIGOLD}" fill-opacity="0.55" stroke="{INK}" stroke-width="1.1"/>
+        <path d="M 60 51 Q 70 43 80 51" fill="none" stroke="{INK}" stroke-width="1.2"/>
+        <circle cx="38" cy="53" r="8" fill="none" stroke="{INK}" stroke-width="1" stroke-dasharray="2.5 2.5">
+          <animateTransform attributeName="transform" type="rotate" from="0 38 53" to="360 38 53" dur="9s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="102" cy="53" r="4" fill="{CORAL}">
+          <animate attributeName="r" values="3.2;5.2;3.2" dur="2.6s" repeatCount="indefinite"/>
+        </circle>
+        <text x="12" y="112" class="sans" font-size="8" font-weight="600" fill="{INK_MUTED}" letter-spacing="1.2">SUB-20K INR BOM</text>""",
+    )
+
+    # 3. VETIFI AI — Warm Peach #F1B48E
+    posters["poster-vetifi.svg"] = render_poster_card(
+        uid="vetifi",
+        name="Vetifi AI",
+        year="2025–2026",
+        line1="Care,",
+        line2="with evidence.",
+        tagline1="Clinical veterinary RAG & knowledge graph.",
+        tagline2="10,000+ active vets · 96.23% accuracy",
+        footer="Retrieve, reason, recommend",
+        bg=PEACH,
+        bg_shapes_svg=f"""
+        <path d="M 252 252 V 82 A 92 92 0 0 1 436 82 V 252 Z" fill="{SKY}">
+          <animateTransform attributeName="transform" type="translate" values="0,0; 0,-8; 0,0" dur="10.5s" repeatCount="indefinite"/>
+        </path>
+        <circle cx="18" cy="240" r="68" fill="{PAPER}" opacity="0.58"/>
+        <rect x="330" y="196" width="96" height="62" rx="10" fill="{SAGE}"/>""",
+        motif_svg=f"""
+        <circle cx="70" cy="54" r="30" fill="none" stroke="{INK}" stroke-opacity="0.2" stroke-width="1"/>
+        <g>
+          <circle cx="70" cy="24" r="5" fill="{CORAL_SOFT}" stroke="{INK}" stroke-width="0.9"/>
+          <circle cx="100" cy="54" r="4.5" fill="{SKY}" stroke="{INK}" stroke-width="0.9"/>
+          <circle cx="40" cy="54" r="4.5" fill="{MARIGOLD}" stroke="{INK}" stroke-width="0.9"/>
+          <circle cx="70" cy="84" r="5" fill="{SAGE}" stroke="{INK}" stroke-width="0.9"/>
+          <animateTransform attributeName="transform" type="rotate" from="0 70 54" to="360 70 54" dur="16s" repeatCount="indefinite"/>
+        </g>
+        <circle cx="70" cy="54" r="11" fill="{PEACH}" stroke="{INK}" stroke-width="1"/>
+        <rect x="68" y="48" width="4" height="12" rx="1.5" fill="{INK}"/>
+        <rect x="64" y="52" width="12" height="4" rx="1.5" fill="{INK}"/>
+        <text x="12" y="112" class="sans" font-size="8" font-weight="600" fill="{INK_MUTED}" letter-spacing="1.2">BM25 + ONTOLOGY</text>""",
+    )
+
+    # 4. SARAL AI — Sky #9DBDD8
+    posters["poster-saral.svg"] = render_poster_card(
+        uid="saral",
+        name="Saral AI",
+        year="2026",
+        line1="Civic life,",
+        line2="made simple.",
+        tagline1="Privacy-first Flutter civic assistant.",
+        tagline2="12-state FastAPI · FLAG_SECURE vault",
+        footer="Ask, automate, vault",
+        bg=SKY,
+        bg_shapes_svg=f"""
+        <path d="M 248 252 V 76 A 96 96 0 0 1 440 76 V 252 Z" fill="{PAPER}" opacity="0.62">
+          <animateTransform attributeName="transform" type="translate" values="0,0; 0,8; 0,0" dur="11.5s" repeatCount="indefinite"/>
+        </path>
+        <circle cx="38" cy="242" r="56" fill="{CORAL_SOFT}"/>
+        <rect x="308" y="196" width="120" height="62" rx="31" fill="{MARIGOLD}"/>""",
+        motif_svg=f"""
+        <rect x="46" y="14" width="48" height="76" rx="11" fill="{PAPER_DEEP}" stroke="{INK}" stroke-width="1.1"/>
+        <line x1="63" y1="22" x2="77" y2="22" stroke="{INK}" stroke-width="1.2" stroke-linecap="round"/>
+        <rect x="54" y="31" width="32" height="16" rx="4" fill="{CORAL_SOFT}" opacity="0.82"/>
+        <line x1="54" y1="57" x2="86" y2="57" stroke="{INK}" stroke-opacity="0.35" stroke-width="1.2"/>
+        <line x1="54" y1="65" x2="76" y2="65" stroke="{INK}" stroke-opacity="0.35" stroke-width="1.2"/>
+        <circle cx="54" cy="76" r="3" fill="{INK_TEAL}">
+          <animate attributeName="cx" values="54;84;54" dur="3.6s" repeatCount="indefinite"/>
+        </circle>
+        <text x="12" y="112" class="sans" font-size="8" font-weight="600" fill="{INK_MUTED}" letter-spacing="1.2">ZERO CLOUD SECRETS</text>""",
+    )
+
+    # 5. THE DEVELOPER COMMUNITY — Dusty Rose #EDB3C3
+    posters["poster-tdc.svg"] = render_poster_card(
+        uid="tdc",
+        name="The Developer Community",
+        year="2025–2026",
+        line1="Students",
+        line2="who ship.",
+        tagline1="1,000+ registrations across 5+ univs.",
+        tagline2="React Router 7 SSR · ONE-CREW · STASH",
+        footer="Learn, build, prove",
+        bg=ROSE,
+        bg_shapes_svg=f"""
+        <circle cx="350" cy="96" r="98" fill="{MARIGOLD}">
+          <animateTransform attributeName="transform" type="translate" values="0,0; 6,-6; 0,0" dur="12s" repeatCount="indefinite"/>
+        </circle>
+        <path d="M -22 252 V 190 A 74 74 0 0 1 126 190 V 252 Z" fill="{PAPER}" opacity="0.58"/>
+        <rect x="314" y="196" width="114" height="62" rx="31" fill="{SAGE}"/>""",
+        motif_svg=f"""
+        <polygon points="70,22 108,82 32,82" fill="none" stroke="{INK}" stroke-opacity="0.28" stroke-width="1.2"/>
+        <circle cx="0" cy="0" r="3.2" fill="{INK}">
+          <animateMotion dur="5.2s" repeatCount="indefinite" path="M 70,22 L 108,82 L 32,82 Z"/>
+        </circle>
+        <circle cx="70" cy="22" r="8" fill="{MARIGOLD}" stroke="{INK}" stroke-width="1"/>
+        <circle cx="108" cy="82" r="8" fill="{CORAL_SOFT}" stroke="{INK}" stroke-width="1"/>
+        <circle cx="32" cy="82" r="8" fill="{SKY}" stroke="{INK}" stroke-width="1"/>
+        <text x="12" y="112" class="sans" font-size="8" font-weight="600" fill="{INK_MUTED}" letter-spacing="1.2">20 COHORT 1 INTERNS</text>""",
+    )
+
+    # 6. ICARUS CUBESAT + HAWKEYE — Slate Sky #A6C3D6
+    posters["poster-icarus.svg"] = render_poster_card(
+        uid="icarus",
+        name="ICARUS · KiboCUBE",
+        year="2024–2026",
+        line1="Calm,",
+        line2="in orbit.",
+        tagline1="1U CubeSat ADCS, B-dot & 7.4V EPS.",
+        tagline2="UNOOSA / JAXA · 10/10 physics tests",
+        footer="Sense, detumble, settle",
+        bg=SKY_SLATE,
+        bg_shapes_svg=f"""
+        <circle cx="352" cy="112" r="98" fill="{PAPER}" opacity="0.58">
+          <animateTransform attributeName="transform" type="translate" values="0,0; -6,6; 0,0" dur="10.5s" repeatCount="indefinite"/>
+        </circle>
+        <path d="M -20 252 V 192 A 68 68 0 0 1 116 192 V 252 Z" fill="{MARIGOLD}"/>
+        <rect x="334" y="196" width="90" height="62" rx="10" fill="{CORAL_SOFT}"/>""",
+        motif_svg=f"""
+        <g transform="rotate(-16 70 54)">
+          <ellipse cx="70" cy="54" rx="50" ry="20" fill="none" stroke="{INK}" stroke-opacity="0.34" stroke-width="1.1" stroke-dasharray="3 4"/>
+          <circle cx="0" cy="0" r="4.5" fill="{CORAL}">
+            <animateMotion dur="5.6s" repeatCount="indefinite" path="M 120,54 A 50,20 0 1,1 20,54 A 50,20 0 1,1 120,54"/>
+          </circle>
+        </g>
+        <rect x="59" y="43" width="22" height="22" rx="3.5" fill="{PAPER}" stroke="{INK}" stroke-width="1.2" transform="rotate(14 70 54)"/>
+        <circle cx="70" cy="54" r="3" fill="{INK}"/>
+        <text x="12" y="112" class="sans" font-size="8" font-weight="600" fill="{INK_MUTED}" letter-spacing="1.2">M × B UNDERACTUATED</text>""",
+    )
+
+    return posters
+
+
+def generate_progress_ledger(metrics: dict, chrono: dict) -> str:
     contribs = metrics["total_contributions"]
     if contribs < 500:
         contrib_goal = max(200, int(math.ceil((contribs + 25) / 50.0) * 50))
         contrib_title = f"Public GitHub Contributions ({contribs:,} / {contrib_goal:,})"
-        contrib_sub = f"{metrics['commits']:,} public commits · 1,073+ incl. private"
+        contrib_sub = f"{metrics['commits']:,} public commits · 1,073+ incl. private repos"
     else:
         contrib_goal = max(1200, int(math.ceil((contribs + 100) / 500.0) * 500))
         contrib_title = f"Annual GitHub Contributions ({contribs:,} / {contrib_goal:,})"
@@ -570,334 +752,302 @@ def generate_progress_bars(metrics: dict, chrono: dict) -> str:
     repo_pct = round(min(100.0, (pub_repos / repo_goal) * 100.0), 1)
 
     left_bars = [
-        (
-            f"Year Progress ({chrono['year']})",
-            f"Day {chrono['day_of_year']} / {chrono['days_in_year']}",
-            chrono["year_pct"],
-            "#0EA5E9",
-            "#38BDF8",
-        ),
-        (
-            "B.Tech ECE · MIT Bengaluru (2024–2028)",
-            f"Semester {chrono['sem']} / 8 · AICTE Scholar",
-            chrono["deg_pct"],
-            "#8B5CF6",
-            "#A78BFA",
-        ),
-        (
-            contrib_title,
-            contrib_sub,
-            contrib_pct,
-            "#0D9488",
-            "#2DD4BF",
-        ),
-        (
-            f"Open-Source Repositories ({pub_repos} / {repo_goal})",
-            f"{metrics['total_repos_note']}+ total repos incl. private ventures",
-            repo_pct,
-            "#D97706",
-            "#FBBF24",
-        ),
+        (f"Year Progress ({chrono['year']})", f"Day {chrono['day_of_year']} of {chrono['days_in_year']}", chrono["year_pct"], INK_NAVY, True),
+        ("B.Tech ECE · MIT Bengaluru (2024–2028)", f"Semester {chrono['sem']} of 8 · AICTE National Merit Scholar", chrono["deg_pct"], INK_MUTED, True),
+        (contrib_title, contrib_sub, contrib_pct, INK_TEAL, True),
+        (f"Open-Source Repositories ({pub_repos} / {repo_goal})", f"{metrics['total_repos_note']}+ total repositories incl. private ventures", repo_pct, CORAL, True),
     ]
 
     right_bars = [
-        ("TRACE · Neuro-Symbolic Security Scanner", "npm & PyPI · 0.261s · 250+ Tests", 95.0, "#0D9488", "#2DD4BF"),
-        ("Your Space · Android Media Super-App", "14 Packages · 151 Tests · Play Pre-Release", 92.0, "#2563EB", "#38BDF8"),
-        ("ICARUS · 1U CubeSat ADCS & EPS", "UNOOSA / JAXA KiboCUBE · 10/10 Physics", 88.0, "#7C3AED", "#A78BFA"),
-        ("HAWKEYE · IAF Runway FOD Fusion", "76–81 GHz Radar + 8 Cams · Aero India '27", 82.0, "#E11D48", "#FB7185"),
-        ("Specular · EvenEi AI Smart Glasses", "$1K Seed Funded · Google/Antler Immersion", 68.0, "#D97706", "#FBBF24"),
+        ("TRACE · Neuro-Symbolic Security", "npm & PyPI · 0.261s audit · 250+ passing tests", 95.0, SEAGLASS, False),
+        ("Your Space · Android Super-App", "14 Dart packages · 151 tests · Play Pre-Release", 92.0, LILAC, False),
+        ("ICARUS · 1U CubeSat ADCS & EPS", "UNOOSA / JAXA KiboCUBE · 10/10 physics tests", 88.0, SKY, False),
+        ("HAWKEYE · IAF Runway FOD Fusion", "76–81 GHz radar + 8 modalities · Aero India 2027", 82.0, CORAL_SOFT, False),
+        ("Specular · EvenEi AI Glasses", "USD 1,000 seed · Google / Antler Immersion", 68.0, MARIGOLD, False),
     ]
 
     defs_parts = []
     bars_parts = []
 
-    # Left column bars
-    for i, (title, sub, pct, c1, c2) in enumerate(left_bars):
-        by = 102 + i * 72
-        d, e = render_animated_bar(
-            uid=f"L{i}",
-            x=32,
-            y=by + 21,
-            width=392,
+    for i, (title, sub, pct, col, is_dark) in enumerate(left_bars):
+        by = 128 + i * 74
+        d, e = render_editorial_bar(
+            uid=f"PL{i}",
+            x=34,
+            y=by + 23,
+            width=390,
             height=13,
             pct=pct,
-            c1=c1,
-            c2=c2,
-            delay=0.10 * i,
-            shimmer_dur=3.0 + i * 0.25,
-            shimmer_offset=0.4 * i,
+            fill_color=col,
+            dark_fill=is_dark,
+            hatch_dur=2.4 + i * 0.25,
+            phase=i * 0.45,
         )
         defs_parts.append(d)
         bars_parts.append(f"""
-    <text x="32" y="{by + 11}" class="sans" font-size="12.5" font-weight="600" fill="#F1F5F9">{esc(title)}</text>
-    <text x="424" y="{by + 11}" text-anchor="end" class="mono" font-size="12" font-weight="700" fill="{c2}">{pct:.1f}%</text>
+    <text x="34" y="{by + 10}" class="sans" font-size="12.5" font-weight="600" fill="{INK}">{esc(title)}</text>
+    <text x="424" y="{by + 10}" text-anchor="end" class="serif" font-size="15" font-style="italic" fill="{INK_MUTED}">{pct:.1f}%</text>
     {e}
-    <text x="32" y="{by + 50}" class="mono" font-size="10" fill="#64748B">{esc(sub)}</text>""")
+    <text x="34" y="{by + 51}" class="sans" font-size="10.5" fill="{INK_SOFT}">{esc(sub)}</text>""")
 
-    # Right column bars
-    for i, (title, sub, pct, c1, c2) in enumerate(right_bars):
-        by = 102 + i * 68
-        d, e = render_animated_bar(
-            uid=f"R{i}",
+    for i, (title, sub, pct, col, is_dark) in enumerate(right_bars):
+        by = 128 + i * 68
+        d, e = render_editorial_bar(
+            uid=f"PR{i}",
             x=476,
-            y=by + 20,
-            width=392,
-            height=12,
+            y=by + 22,
+            width=390,
+            height=13,
             pct=pct,
-            c1=c1,
-            c2=c2,
-            delay=0.12 + 0.10 * i,
-            shimmer_dur=2.8 + i * 0.22,
-            shimmer_offset=0.35 * i + 0.2,
+            fill_color=col,
+            dark_fill=is_dark,
+            hatch_dur=2.3 + i * 0.22,
+            phase=0.25 + i * 0.4,
         )
         defs_parts.append(d)
         bars_parts.append(f"""
-    <text x="476" y="{by + 10}" class="sans" font-size="12.5" font-weight="600" fill="#F1F5F9">{esc(title)}</text>
-    <text x="868" y="{by + 10}" text-anchor="end" class="mono" font-size="12" font-weight="700" fill="{c2}">{int(pct)}%</text>
+    <text x="476" y="{by + 9}" class="sans" font-size="12.5" font-weight="600" fill="{INK}">{esc(title)}</text>
+    <text x="866" y="{by + 9}" text-anchor="end" class="serif" font-size="15" font-style="italic" fill="{INK_MUTED}">{int(pct)}%</text>
     {e}
-    <text x="476" y="{by + 47}" class="mono" font-size="10" fill="#64748B">{esc(sub)}</text>""")
+    <text x="476" y="{by + 49}" class="sans" font-size="10.5" fill="{INK_SOFT}">{esc(sub)}</text>""")
 
-    # Animated mini heartbeat equalizer bars in bottom-left telemetry widget
-    eq_bars = []
-    eq_heights = [8, 16, 11, 20, 14, 18, 9, 22, 13, 17, 10, 19, 12, 15]
-    for j, h in enumerate(eq_heights):
-        ex = 32 + j * 9
-        dur = 1.1 + (j % 5) * 0.28
-        eq_bars.append(
-            f'<rect x="{ex}" y="{424 - h}" width="5" height="{h}" rx="2.5" fill="#14B8A6" opacity="0.88">'
-            f'<animate attributeName="height" values="{max(4, h - 8)};{h + 4};{max(5, h - 6)}" dur="{dur:.2f}s" repeatCount="indefinite"/>'
-            f'<animate attributeName="y" values="{424 - max(4, h - 8)};{424 - (h + 4)};{424 - max(5, h - 6)}" dur="{dur:.2f}s" repeatCount="indefinite"/>'
-            f"</rect>"
-        )
-
-    return f"""<svg width="900" height="470" viewBox="0 0 900 470" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated live progress bars for year progress, degree, GitHub goals, and flagship projects">
+    return f"""<svg width="900" height="498" viewBox="0 0 900 498" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Editorial architectural progress ledger — live year, degree, GitHub and flagship pipelines">
   <defs>
-    <linearGradient id="progBg" x1="0" y1="0" x2="900" y2="470" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0B1120"/>
-      <stop offset="100%" stop-color="#0F172A"/>
-    </linearGradient>
-    <linearGradient id="barShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0"/>
-      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.48"/>
-      <stop offset="55%" stop-color="#FFFFFF" stop-opacity="0.62"/>
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
-    </linearGradient>
-    <pattern id="kineticStripes" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-      <rect x="0" y="0" width="8" height="20" fill="#FFFFFF" opacity="0.55"/>
+    <pattern id="hatchLight" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="14" stroke="{PAPER}" stroke-width="2.2"/>
+    </pattern>
+    <pattern id="hatchInk" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="14" stroke="{INK}" stroke-width="1.6"/>
     </pattern>
     {''.join(defs_parts)}
+    <clipPath id="progClip">
+      <rect x="1" y="1" width="898" height="496" rx="18"/>
+    </clipPath>
     <style>
-      .mono {{ font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }}
-      .sans {{ font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }}
+      .serif {{ font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif; }}
+      .sans {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }}
+      .mono {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }}
     </style>
   </defs>
 
-  <rect x="1" y="1" width="898" height="468" rx="14" fill="url(#progBg)" stroke="#243247" stroke-width="1.2"/>
+  <g clip-path="url(#progClip)">
+    <rect x="0" y="0" width="900" height="498" fill="{PAPER}"/>
 
-  <!-- Header Bar -->
-  <path d="M 1 15 A 14 14 0 0 1 15 1 L 885 1 A 14 14 0 0 1 899 15 L 899 54 L 1 54 Z" fill="#121B2E"/>
-  <line x1="1" y1="54" x2="899" y2="54" stroke="#1E293B" stroke-width="1"/>
-  <text x="28" y="33" class="mono" font-size="13" font-weight="700" fill="#F8FAFC" letter-spacing="1.3">LIVE PROGRESS TELEMETRY &amp; ACTIVE MISSIONS</text>
+    <!-- Editorial Header Band -->
+    <text x="34" y="34" class="sans" font-size="10" font-weight="600" fill="{INK_MUTED}" letter-spacing="2">LIVE TELEMETRY · AUTO-SYNCED DAILY</text>
+    <text x="34" y="68" class="serif" font-size="33" font-weight="400" fill="{INK}">Progress <tspan font-style="italic" fill="{CORAL}">&amp; pipelines</tspan></text>
 
-  <!-- Auto-sync Live Pill -->
-  <g transform="translate(658, 15)">
-    <rect x="0" y="0" width="218" height="24" rx="12" fill="#0B2426" stroke="#14B8A6" stroke-width="1" stroke-opacity="0.5"/>
-    <circle cx="14" cy="12" r="3.5" fill="#14B8A6">
-      <animate attributeName="opacity" values="1;0.25;1" dur="1.7s" repeatCount="indefinite"/>
-    </circle>
-    <text x="25" y="15.5" class="mono" font-size="10" font-weight="600" fill="#5EEAD4">AUTO-SYNC · {esc(chrono['date_str'])}</text>
+    <!-- Crisp paper pill with breathing pine dot -->
+    <g transform="translate(702, 34)">
+      <rect x="0" y="0" width="164" height="28" rx="14" fill="{PAPER_DEEP}" stroke="{LINE_STRONG}" stroke-width="1"/>
+      <circle cx="16" cy="14" r="3.5" fill="{INK_TEAL}">
+        <animate attributeName="opacity" values="1;0.35;1" dur="2.4s" repeatCount="indefinite"/>
+      </circle>
+      <text x="28" y="17.5" class="mono" font-size="9.8" font-weight="600" fill="{INK_SOFT}">SYNCED · {esc(chrono['date_str'].upper())}</text>
+    </g>
+
+    <line x1="0" y1="86" x2="900" y2="86" stroke="{LINE}" stroke-width="1"/>
+    <line x1="450" y1="86" x2="450" y2="498" stroke="{LINE}" stroke-width="1"/>
+
+    <!-- Column headers -->
+    <text x="34" y="112" class="sans" font-size="9.8" font-weight="600" fill="{INK_MUTED}" letter-spacing="1.8">01  /  CHRONOLOGY &amp; GITHUB TARGETS</text>
+    <text x="476" y="112" class="sans" font-size="9.8" font-weight="600" fill="{INK_MUTED}" letter-spacing="1.8">02  /  ACTIVE BUILD PIPELINES</text>
+
+    {''.join(bars_parts)}
+
+    <!-- Bottom-left Architectural Waveform Plotter -->
+    <line x1="34" y1="422" x2="424" y2="422" stroke="{LINE}" stroke-width="1"/>
+    <g transform="translate(34, 434)">
+      <rect x="0" y="0" width="136" height="44" rx="8" fill="{PAPER_DEEP}" stroke="{LINE_STRONG}" stroke-width="0.9"/>
+      <line x1="10" y1="22" x2="126" y2="22" stroke="{INK}" stroke-opacity="0.14" stroke-width="0.8"/>
+      <path d="M 10 22 C 22 6, 34 38, 46 22 C 58 10, 70 34, 82 22 C 94 14, 106 28, 118 22 L 126 22" fill="none" stroke="{INK}" stroke-width="1.25"/>
+      <circle cx="0" cy="0" r="3" fill="{CORAL}">
+        <animateMotion dur="4.2s" repeatCount="indefinite" path="M 10,22 C 22,6 34,38 46,22 C 58,10 70,34 82,22 C 94,14 106,28 118,22 L 126,22"/>
+      </circle>
+      <text x="150" y="18" class="sans" font-size="10.5" font-weight="600" fill="{INK}" letter-spacing="1.1">PEAK VELOCITY · {metrics['peak_day']} COMMITS / DAY</text>
+      <text x="150" y="35" class="sans" font-size="10.5" fill="{INK_SOFT}">Refreshed daily via GitHub Actions GraphQL</text>
+    </g>
   </g>
 
-  <!-- Sub-panels -->
-  <rect x="16" y="68" width="424" height="384" rx="11" fill="#0A0F1D" stroke="#1E293B" stroke-width="1"/>
-  <rect x="460" y="68" width="424" height="384" rx="11" fill="#0A0F1D" stroke="#1E293B" stroke-width="1"/>
-
-  <text x="32" y="89" class="mono" font-size="10.5" font-weight="700" fill="#38BDF8" letter-spacing="1.2">01 // CHRONOLOGY &amp; GITHUB TARGETS</text>
-  <text x="476" y="89" class="mono" font-size="10.5" font-weight="700" fill="#2DD4BF" letter-spacing="1.2">02 // FLAGSHIP BUILD PIPELINES</text>
-
-  {''.join(bars_parts)}
-
-  <!-- Bottom-left Live Velocity Strip -->
-  <line x1="32" y1="390" x2="424" y2="390" stroke="#1E293B" stroke-width="1"/>
-  {''.join(eq_bars)}
-  <text x="172" y="411" class="mono" font-size="10.5" font-weight="600" fill="#CBD5E1">PEAK VELOCITY: {metrics['peak_day']} COMMITS / DAY</text>
-  <text x="172" y="428" class="mono" font-size="9.5" fill="#64748B">Synced daily via GitHub Actions GraphQL</text>
+  <rect x="1" y="1" width="898" height="496" rx="18" stroke="{LINE_STRONG}" stroke-width="1"/>
 </svg>
 """
 
 
-def generate_skills_progress(metrics: dict) -> str:
+def generate_craft_telemetry(metrics: dict) -> str:
     langs = metrics["languages"][:6]
-    domains = [
-        ("AI / ML, RAG & Computer Vision", "YOLO · DETR · Knowledge Graphs · LLMs", 95.0, "#0D9488", "#2DD4BF"),
-        ("Flutter, Dart & Mobile Systems", "Riverpod · Drift · Native Android Plugins", 93.0, "#0284C7", "#38BDF8"),
-        ("Backend, FastAPI & Postgres RLS", "Supabase · Firebase · Node.js · Realtime", 92.0, "#059669", "#34D399"),
-        ("Full-Stack Web (React / TS / SSR)", "React 19 · React Router 7 · Next.js", 91.0, "#7C3AED", "#A78BFA"),
-        ("Security, AST & MCP Agents", "TRACE · Attack-Path Models · Android Sec", 90.0, "#E11D48", "#FB7185"),
-        ("Embedded, C++ & Aerospace ADCS", "ESP32-S3 · I2C · CubeSat B-dot · OrCAD", 86.0, "#D97706", "#FBBF24"),
-    ]
-
-    defs_parts = []
-    bars_parts = []
-
     lang_notes = {
         "Python": "TRACE · HAWKEYE · Vetifi AI · ICARUS · FastAPI",
         "Dart": "Your Space · Stockie · Saral AI · Driftinn · Specular",
-        "TypeScript": "EvenEi · TDC · AdSpace · MIT KPI Portal",
-        "HTML": "CubeSat EPS Sim · Web Interfaces · Dashboards",
-        "CSS": "Design Tokens · Responsive Modules · Glass UI",
-        "ShaderLab": "DroneController Unity FPV & Visual Shaders",
+        "TypeScript": "EvenEi · TDC · AdSpace · MIT Bengaluru Portal",
+        "HTML": "CubeSat EPS Simulation · Interfaces · Dashboards",
+        "CSS": "Design Tokens · Responsive Layouts · Paper UI",
+        "ShaderLab": "DroneController Unity FPV & Flight Physics",
         "JavaScript": "Three.js WebGL · Node.js · SquashDeck",
-        "C++": "CubeSat B-Dot Control · ESP32-S3 Firmware",
-        "Jupyter Notebook": "ML Evaluation · SafeSpace Benchmarks",
+        "C++": "CubeSat B-Dot Controller · ESP32-S3 Firmware",
+        "Jupyter Notebook": "ML Evaluation · SafeSpace Blind Benchmarks",
         "Kotlin": "Native Android MediaStore & Security Channels",
     }
 
+    domains = [
+        ("AI / ML, RAG & Computer Vision", "YOLO · DETR · Knowledge Graphs · LLMs", 95.0, SEAGLASS, False),
+        ("Flutter, Dart & Mobile Systems", "Riverpod · Drift SQLite · Native Android", 93.0, SKY, False),
+        ("Backend, FastAPI & Postgres RLS", "Supabase · Firebase · Node.js · Realtime", 92.0, SAGE, False),
+        ("Full-Stack Web (React / TS / SSR)", "React 19 · React Router 7 · Next.js", 91.0, SAND, False),
+        ("Security, AST & MCP Agents", "TRACE · Attack-Path Models · Android Sec", 90.0, ROSE, False),
+        ("Embedded, C++ & Aerospace ADCS", "ESP32-S3 · I2C · CubeSat B-dot · OrCAD", 86.0, MARIGOLD, False),
+    ]
+
+    defs_parts = []
+    bars_parts = []
+
     for i, (lang, pct) in enumerate(langs):
-        c1, c2 = LANG_COLORS.get(lang, ("#14B8A6", "#38BDF8"))
-        note = lang_notes.get(lang, "Production & Open-Source Repositories")
-        by = 100 + i * 52
-        d, e = render_animated_bar(
-            uid=f"LANG{i}",
-            x=32,
-            y=by + 17,
-            width=392,
+        col = LANG_PALETTE.get(lang, INK_TEAL)
+        is_dark = col in (INK_NAVY, INK_TEAL, INK_MUTED, CORAL)
+        note = lang_notes.get(lang, "Open-source & production systems")
+        by = 128 + i * 52
+        d, e = render_editorial_bar(
+            uid=f"CL{i}",
+            x=34,
+            y=by + 20,
+            width=390,
             height=11,
             pct=max(pct, 6.0),
-            c1=c1,
-            c2=c2,
-            delay=0.08 * i,
-            shimmer_dur=3.2 + i * 0.2,
-            shimmer_offset=0.3 * i,
+            fill_color=col,
+            dark_fill=is_dark,
+            hatch_dur=2.5 + i * 0.2,
+            phase=i * 0.35,
         )
         defs_parts.append(d)
         bars_parts.append(f"""
-    <circle cx="38" cy="{by + 6}" r="4" fill="{c1}"/>
-    <text x="49" y="{by + 10}" class="sans" font-size="12.5" font-weight="600" fill="#F1F5F9">{esc(lang)}</text>
-    <text x="424" y="{by + 10}" text-anchor="end" class="mono" font-size="11.5" font-weight="700" fill="{c1}">{pct:.1f}%</text>
+    <circle cx="40" cy="{by + 6}" r="4" fill="{col}" stroke="{INK}" stroke-opacity="0.25" stroke-width="0.8"/>
+    <text x="51" y="{by + 10}" class="sans" font-size="12" font-weight="600" fill="{INK}">{esc(lang)}</text>
+    <text x="424" y="{by + 10}" text-anchor="end" class="serif" font-size="14" font-style="italic" fill="{INK_MUTED}">{pct:.1f}%</text>
     {e}
-    <text x="32" y="{by + 41}" class="mono" font-size="9.5" fill="#64748B">{esc(note)}</text>""")
+    <text x="34" y="{by + 43}" class="sans" font-size="10" fill="{INK_SOFT}">{esc(note)}</text>""")
 
-    for i, (domain, stack, pct, c1, c2) in enumerate(domains):
-        by = 100 + i * 52
-        d, e = render_animated_bar(
-            uid=f"DOM{i}",
+    for i, (dom, stack, pct, col, is_dark) in enumerate(domains):
+        by = 128 + i * 52
+        d, e = render_editorial_bar(
+            uid=f"CD{i}",
             x=476,
-            y=by + 17,
-            width=392,
+            y=by + 20,
+            width=390,
             height=11,
             pct=pct,
-            c1=c1,
-            c2=c2,
-            delay=0.10 + 0.08 * i,
-            shimmer_dur=2.9 + i * 0.22,
-            shimmer_offset=0.45 * i,
+            fill_color=col,
+            dark_fill=is_dark,
+            hatch_dur=2.3 + i * 0.22,
+            phase=0.3 + i * 0.35,
         )
         defs_parts.append(d)
         bars_parts.append(f"""
-    <text x="476" y="{by + 10}" class="sans" font-size="12.5" font-weight="600" fill="#F1F5F9">{esc(domain)}</text>
-    <text x="868" y="{by + 10}" text-anchor="end" class="mono" font-size="11.5" font-weight="700" fill="{c2}">{int(pct)}%</text>
+    <text x="476" y="{by + 9}" class="sans" font-size="12" font-weight="600" fill="{INK}">{esc(dom)}</text>
+    <text x="866" y="{by + 9}" text-anchor="end" class="serif" font-size="14" font-style="italic" fill="{INK_MUTED}">{int(pct)}%</text>
     {e}
-    <text x="476" y="{by + 41}" class="mono" font-size="9.5" fill="#64748B">{esc(stack)}</text>""")
+    <text x="476" y="{by + 43}" class="sans" font-size="10" fill="{INK_SOFT}">{esc(stack)}</text>""")
 
-    return f"""<svg width="900" height="432" viewBox="0 0 900 432" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated language distribution and engineering domain mastery progress bars">
+    # Amogh's signature CraftDial (SectionArt.jsx) rotating 5-petal pastel dial
+    petals = [CORAL_SOFT, SKY, SAGE, LILAC, MARIGOLD]
+    petal_svg = "".join(
+        f'<g transform="rotate({i * 72} 0 0)"><rect x="-5" y="-23" width="10" height="17" rx="5" fill="{col}" opacity="0.88"/></g>'
+        for i, col in enumerate(petals)
+    )
+
+    return f"""<svg width="900" height="456" viewBox="0 0 900 456" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tools and craft — live GitHub languages and core engineering domains">
   <defs>
-    <linearGradient id="skillBg" x1="0" y1="0" x2="900" y2="432" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0B1120"/>
-      <stop offset="100%" stop-color="#0F172A"/>
-    </linearGradient>
-    <linearGradient id="barShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0"/>
-      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.48"/>
-      <stop offset="55%" stop-color="#FFFFFF" stop-opacity="0.62"/>
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
-    </linearGradient>
-    <pattern id="kineticStripes" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-      <rect x="0" y="0" width="8" height="20" fill="#FFFFFF" opacity="0.55"/>
+    <pattern id="hatchLight" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="14" stroke="{PAPER}" stroke-width="2.2"/>
+    </pattern>
+    <pattern id="hatchInk" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="14" stroke="{INK}" stroke-width="1.6"/>
     </pattern>
     {''.join(defs_parts)}
+    <clipPath id="craftClip">
+      <rect x="1" y="1" width="898" height="454" rx="18"/>
+    </clipPath>
     <style>
-      .mono {{ font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }}
-      .sans {{ font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }}
+      .serif {{ font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif; }}
+      .sans {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }}
     </style>
   </defs>
 
-  <rect x="1" y="1" width="898" height="430" rx="14" fill="url(#skillBg)" stroke="#243247" stroke-width="1.2"/>
+  <g clip-path="url(#craftClip)">
+    <rect x="0" y="0" width="900" height="456" fill="{PAPER}"/>
 
-  <path d="M 1 15 A 14 14 0 0 1 15 1 L 885 1 A 14 14 0 0 1 899 15 L 899 50 L 1 50 Z" fill="#121B2E"/>
-  <line x1="1" y1="50" x2="899" y2="50" stroke="#1E293B" stroke-width="1"/>
-  <text x="28" y="31" class="mono" font-size="12.5" font-weight="700" fill="#F8FAFC" letter-spacing="1.2">LIVE LANGUAGE TELEMETRY &amp; ENGINEERING PROFICIENCY</text>
-  <text x="872" y="31" text-anchor="end" class="mono" font-size="10" fill="#64748B">REPO-WEIGHTED LIVE SHARE</text>
+    <text x="34" y="34" class="sans" font-size="10" font-weight="600" fill="{INK_MUTED}" letter-spacing="2">REPO-WEIGHTED TELEMETRY &amp; DISCIPLINES</text>
+    <text x="34" y="68" class="serif" font-size="33" font-weight="400" fill="{INK}">Tools <tspan font-style="italic" fill="{CORAL}">&amp; craft</tspan></text>
 
-  <rect x="16" y="62" width="424" height="354" rx="11" fill="#0A0F1D" stroke="#1E293B" stroke-width="1"/>
-  <rect x="460" y="62" width="424" height="354" rx="11" fill="#0A0F1D" stroke="#1E293B" stroke-width="1"/>
+    <!-- Animated Craft Dial from SectionArt.jsx -->
+    <g transform="translate(838, 44)">
+      <circle cx="0" cy="0" r="28" fill="none" stroke="{INK}" stroke-opacity="0.16" stroke-width="1"/>
+      <g>
+        {petal_svg}
+        <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="22s" repeatCount="indefinite"/>
+      </g>
+      <circle cx="0" cy="0" r="7" fill="{PAPER}" stroke="{INK}" stroke-width="1"/>
+      <circle cx="0" cy="0" r="2" fill="{INK}"/>
+    </g>
 
-  <text x="32" y="84" class="mono" font-size="10.5" font-weight="700" fill="#38BDF8" letter-spacing="1.1">GITHUB LANGUAGES (PUBLIC REPOS)</text>
-  <text x="476" y="84" class="mono" font-size="10.5" font-weight="700" fill="#FBBF24" letter-spacing="1.1">CORE SYSTEMS DOMAINS</text>
+    <line x1="0" y1="86" x2="900" y2="86" stroke="{LINE}" stroke-width="1"/>
+    <line x1="450" y1="86" x2="450" y2="456" stroke="{LINE}" stroke-width="1"/>
 
-  {''.join(bars_parts)}
+    <text x="34" y="112" class="sans" font-size="9.8" font-weight="600" fill="{INK_MUTED}" letter-spacing="1.8">LIVE GITHUB LANGUAGES (PUBLIC REPOS)</text>
+    <text x="476" y="112" class="sans" font-size="9.8" font-weight="600" fill="{INK_MUTED}" letter-spacing="1.8">CORE SYSTEMS DOMAINS</text>
+
+    {''.join(bars_parts)}
+  </g>
+
+  <rect x="1" y="1" width="898" height="454" rx="18" stroke="{LINE_STRONG}" stroke-width="1"/>
 </svg>
 """
 
 
-def generate_footer_wave() -> str:
-    return """<svg width="900" height="145" viewBox="0 0 900 145" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amogh V K animated footer">
+def generate_footer_horizon() -> str:
+    """Editorial Horizon Sculpture footer straight from SectionArt.jsx."""
+    return f"""<svg width="900" height="184" viewBox="0 0 900 184" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amogh V K editorial horizon footer">
   <defs>
-    <linearGradient id="footBg" x1="0" y1="0" x2="900" y2="145" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#090D16"/>
-      <stop offset="100%" stop-color="#0F172A"/>
-    </linearGradient>
-    <linearGradient id="wave1" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#14B8A6" stop-opacity="0.24"/>
-      <stop offset="50%" stop-color="#38BDF8" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="#14B8A6" stop-opacity="0.24"/>
-    </linearGradient>
-    <linearGradient id="wave2" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#A78BFA" stop-opacity="0.18"/>
-      <stop offset="50%" stop-color="#F59E0B" stop-opacity="0.22"/>
-      <stop offset="100%" stop-color="#14B8A6" stop-opacity="0.18"/>
-    </linearGradient>
     <clipPath id="footClip">
-      <rect x="1" y="1" width="898" height="143" rx="14"/>
+      <rect x="1" y="1" width="898" height="182" rx="18"/>
     </clipPath>
     <style>
-      .mono { font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-      .sans { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; }
+      .serif {{ font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif; }}
+      .sans {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }}
     </style>
   </defs>
 
   <g clip-path="url(#footClip)">
-    <rect x="0" y="0" width="900" height="145" fill="url(#footBg)"/>
+    <rect x="0" y="0" width="900" height="184" fill="{PAPER}"/>
 
-    <!-- Drifting layered sine waves -->
-    <g>
-      <path d="M 0 92 Q 112 66 225 92 T 450 92 T 675 92 T 900 92 T 1125 92 T 1350 92 L 1350 145 L 0 145 Z" fill="url(#wave1)"/>
-      <animateTransform attributeName="transform" type="translate" from="0 0" to="-450 0" dur="9s" repeatCount="indefinite"/>
+    <!-- Left: Horizon Sculpture (SectionArt.jsx) -->
+    <g transform="translate(128, 96)">
+      <circle cx="0" cy="0" r="58" fill="none" stroke="{INK}" stroke-opacity="0.16" stroke-width="1" stroke-dasharray="2 6">
+        <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="36s" repeatCount="indefinite"/>
+      </circle>
+      <path d="M -46 18 A 46 46 0 0 1 46 18 Z" fill="{CORAL_SOFT}">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 0,-4; 0,0" dur="5.5s" repeatCount="indefinite"/>
+      </path>
+      <circle cx="38" cy="-34" r="16" fill="{MARIGOLD}">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 0,5; 0,0" dur="4.8s" repeatCount="indefinite"/>
+      </circle>
+      <line x1="-60" y1="18" x2="60" y2="18" stroke="{INK}" stroke-opacity="0.38" stroke-width="1"/>
+      <rect x="-42" y="27" width="84" height="8" rx="4" fill="{SKY}"/>
+      <rect x="-26" y="40" width="52" height="8" rx="4" fill="{SAGE}"/>
     </g>
-    <g>
-      <path d="M 0 105 Q 112 126 225 105 T 450 105 T 675 105 T 900 105 T 1125 105 T 1350 105 L 1350 145 L 0 145 Z" fill="url(#wave2)"/>
-      <animateTransform attributeName="transform" type="translate" from="-450 0" to="0 0" dur="12s" repeatCount="indefinite"/>
-    </g>
 
-    <!-- Subtle ambient pulsing stars -->
-    <circle cx="95" cy="32" r="2" fill="#2DD4BF"><animate attributeName="opacity" values="0.2;1;0.2" dur="3.2s" repeatCount="indefinite"/></circle>
-    <circle cx="165" cy="54" r="1.5" fill="#38BDF8"><animate attributeName="opacity" values="0.9;0.2;0.9" dur="2.6s" repeatCount="indefinite"/></circle>
-    <circle cx="745" cy="36" r="2" fill="#FBBF24"><animate attributeName="opacity" values="0.2;1;0.2" dur="3.6s" repeatCount="indefinite"/></circle>
-    <circle cx="818" cy="58" r="1.6" fill="#A78BFA"><animate attributeName="opacity" values="1;0.25;1" dur="2.9s" repeatCount="indefinite"/></circle>
+    <line x1="256" y1="24" x2="256" y2="160" stroke="{LINE}" stroke-width="1"/>
 
-    <!-- Signature Motto -->
-    <text x="450" y="52" text-anchor="middle" class="sans" font-size="18" font-weight="600" font-style="italic" fill="#F8FAFC">
-      "What people find boring, is what interests me."
-    </text>
-    <text x="450" y="78" text-anchor="middle" class="mono" font-size="11.5" fill="#94A3B8">
-      Engineering intelligent systems quietly, rigorously, and end to end.
-    </text>
-    <text x="450" y="122" text-anchor="middle" class="mono" font-size="10.5" fill="#CBD5E1" letter-spacing="1.4">
-      AMOGH V K  ·  EVENEI  ·  THE DEVELOPER COMMUNITY  ·  AMOGH.EVENEI.COM
-    </text>
+    <!-- Right: Editorial Quote & Colophon -->
+    <text x="292" y="48" class="sans" font-size="9.5" font-weight="600" fill="{INK_MUTED}" letter-spacing="2">COLOPHON · QUIET STUDIO</text>
+    <text x="292" y="88" class="serif" font-size="24" font-style="italic" fill="{INK}">“What people find boring, is what interests me.”</text>
+    <text x="292" y="116" class="sans" font-size="13" fill="{INK_SOFT}">Engineering intelligent systems quietly, rigorously, and end to end.</text>
+
+    <line x1="292" y1="136" x2="864" y2="136" stroke="{LINE}" stroke-width="1"/>
+    <text x="292" y="156" class="sans" font-size="9.5" font-weight="600" fill="{INK_SOFT}" letter-spacing="1.8">AMOGH V K  ·  EVENEI  ·  THE DEVELOPER COMMUNITY</text>
+    <text x="864" y="156" text-anchor="end" class="sans" font-size="9.5" font-weight="600" fill="{INK_MUTED}" letter-spacing="1.6">BENGALURU · 12.97° N</text>
   </g>
 
-  <rect x="1" y="1" width="898" height="143" rx="14" stroke="#243247" stroke-width="1.2"/>
+  <rect x="1" y="1" width="898" height="182" rx="18" stroke="{LINE_STRONG}" stroke-width="1"/>
 </svg>
 """
 
@@ -908,19 +1058,19 @@ def main() -> None:
     metrics = fetch_github_data()
     chrono = compute_chronology(now)
 
-    outputs = {
-        "hero-banner.svg": generate_hero_banner(),
-        "divider.svg": generate_divider(),
-        "terminal-card.svg": generate_terminal_card(metrics),
-        "progress-bars.svg": generate_progress_bars(metrics, chrono),
-        "skills-progress.svg": generate_skills_progress(metrics),
-        "footer-wave.svg": generate_footer_wave(),
+    outputs: dict[str, str] = {
+        "hero-editorial.svg": generate_hero_editorial(metrics),
+        "editorial-rule.svg": generate_editorial_rule(),
+        "progress-ledger.svg": generate_progress_ledger(metrics, chrono),
+        "craft-telemetry.svg": generate_craft_telemetry(metrics),
+        "footer-horizon.svg": generate_footer_horizon(),
     }
+    outputs.update(generate_posters())
 
     for filename, content in outputs.items():
         path = ASSETS_DIR / filename
         path.write_text(content, encoding="utf-8")
-        print(f"Wrote {path} ({len(content):,} bytes)")
+        print(f"Wrote {path.name} ({len(content):,} bytes)")
 
 
 if __name__ == "__main__":

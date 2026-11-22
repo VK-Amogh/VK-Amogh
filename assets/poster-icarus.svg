@@ -1,0 +1,57 @@
+<svg width="440" height="252" viewBox="0 0 440 252" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ICARUS · KiboCUBE — Calm, in orbit.">
+  <defs>
+    <clipPath id="pclip_icarus">
+      <rect x="1" y="1" width="438" height="250" rx="16"/>
+    </clipPath>
+    <style>
+      .serif { font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif; }
+      .sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <g clip-path="url(#pclip_icarus)">
+    <rect x="0" y="0" width="440" height="252" fill="#A6C3D6"/>
+
+    <!-- Flat drifting Bauhaus solid forms (straight from Poster.jsx) -->
+    
+        <circle cx="352" cy="112" r="98" fill="#F4EDE3" opacity="0.58">
+          <animateTransform attributeName="transform" type="translate" values="0,0; -6,6; 0,0" dur="10.5s" repeatCount="indefinite"/>
+        </circle>
+        <path d="M -20 252 V 192 A 68 68 0 0 1 116 192 V 252 Z" fill="#E9BF52"/>
+        <rect x="334" y="196" width="90" height="62" rx="10" fill="#F0926A"/>
+
+    <!-- Top meta bar -->
+    <text x="26" y="30" class="sans" font-size="9.5" font-weight="600" fill="#1A1412" fill-opacity="0.72" letter-spacing="1.7">ICARUS · KIBOCUBE</text>
+    <text x="414" y="30" text-anchor="end" class="sans" font-size="9.5" font-weight="600" fill="#1A1412" fill-opacity="0.72" letter-spacing="1.5">2024–2026</text>
+
+    <!-- Two-line editorial serif headline (second line italic!) -->
+    <text x="26" y="102" class="serif" font-size="34" font-weight="400" fill="#1A1412" letter-spacing="-0.6">Calm,</text>
+    <text x="26" y="138" class="serif" font-size="34" font-weight="400" font-style="italic" fill="#1A1412" letter-spacing="-0.6">in orbit.</text>
+
+    <!-- Concise tagline -->
+    <text x="26" y="166" class="sans" font-size="11.5" fill="#1A1412" fill-opacity="0.78">1U CubeSat ADCS, B-dot &amp; 7.4V EPS.</text>
+    <text x="26" y="182" class="sans" font-size="11.5" fill="#1A1412" fill-opacity="0.78">UNOOSA / JAXA · 10/10 physics tests</text>
+
+    <!-- Bespoke animated architectural vector motif on right -->
+    <g transform="translate(274, 62)">
+      <rect x="0" y="0" width="140" height="122" rx="12" fill="#F4EDE3" fill-opacity="0.88" stroke="#1A1412" stroke-opacity="0.22" stroke-width="1"/>
+      
+        <g transform="rotate(-16 70 54)">
+          <ellipse cx="70" cy="54" rx="50" ry="20" fill="none" stroke="#1A1412" stroke-opacity="0.34" stroke-width="1.1" stroke-dasharray="3 4"/>
+          <circle cx="0" cy="0" r="4.5" fill="#D95D39">
+            <animateMotion dur="5.6s" repeatCount="indefinite" path="M 120,54 A 50,20 0 1,1 20,54 A 50,20 0 1,1 120,54"/>
+          </circle>
+        </g>
+        <rect x="59" y="43" width="22" height="22" rx="3.5" fill="#F4EDE3" stroke="#1A1412" stroke-width="1.2" transform="rotate(14 70 54)"/>
+        <circle cx="70" cy="54" r="3" fill="#1A1412"/>
+        <text x="12" y="112" class="sans" font-size="8" font-weight="600" fill="#8F3E26" letter-spacing="1.2">M × B UNDERACTUATED</text>
+    </g>
+
+    <!-- Bottom editorial footer & arrow -->
+    <line x1="26" y1="214" x2="414" y2="214" stroke="#1A1412" stroke-opacity="0.16" stroke-width="1"/>
+    <text x="26" y="234" class="sans" font-size="9.5" font-weight="600" fill="#1A1412" fill-opacity="0.76" letter-spacing="1.6">SENSE, DETUMBLE, SETTLE</text>
+    <text x="414" y="235" text-anchor="end" class="sans" font-size="15" font-weight="400" fill="#1A1412">↗</text>
+  </g>
+
+  <rect x="1" y="1" width="438" height="250" rx="16" stroke="#1A1412" stroke-opacity="0.14" stroke-width="1"/>
+</svg>
