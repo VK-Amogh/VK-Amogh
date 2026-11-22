@@ -1,4 +1,4 @@
-name: Update Quiet Studio Profile Telemetry & Animations
+name: Update Zero-SVG Profile Telemetry & Animated GIFs
 
 on:
   schedule:
@@ -9,13 +9,13 @@ on:
     branches:
       - main
     paths:
-      - "scripts/generate_assets.py"
+      - "scripts/update_telemetry.py"
 
 permissions:
   contents: write
 
 jobs:
-  update-profile:
+  update-telemetry:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout profile repository
@@ -26,26 +26,22 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Generate Quiet Studio animated SVGs & progress ledgers
+      - name: Install Pillow
+        run: pip install --quiet pillow
+
+      - name: Regenerate animated progress & activity GIFs + live telemetry ledger
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 scripts/generate_assets.py
+        run: python3 scripts/update_telemetry.py
 
-      - name: Generate warm-paper editorial contribution snake
-        uses: Platane/snk/svg-only@v3
-        with:
-          github_user_name: VK-Amogh
-          outputs: |
-            assets/snake-paper.svg?color_snake=d95d39&color_dots=#ece3d5,#bacfae,#a9ccc4,#1e5a52,#1a1412
-
-      - name: Commit updated SVG assets
+      - name: Commit updated assets and README telemetry
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/*.svg
+          git add assets/progress.gif assets/activity.gif README.md
           if git diff --cached --quiet; then
-            echo "No SVG asset changes to commit."
+            echo "No telemetry changes to commit."
           else
-            git commit -m "chore(studio): refresh editorial SVGs, progress ledger & snake [skip ci]"
+            git commit -m "chore(telemetry): refresh animated progress & activity GIFs [skip ci]"
             git push
           fi
