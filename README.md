@@ -97,10 +97,10 @@
 
 <!-- TELEMETRY:START -->
 ```text
-LIVE TELEMETRY  ·  SYNCED 2026-11-27 UTC  ·  BENGALURU, IN (12.97° N)
+LIVE TELEMETRY  ·  SYNCED 2026-11-28 UTC  ·  BENGALURU, IN (12.97° N)
 ──────────────────────────────────────────────────────────────────────────
-YEAR 2026      [████████████████████░░]   90.5%   Day 331 / 365
-B.TECH ECE     [█████████████░░░░░░░░░]   60.6%   Sem 5 / 8 · MIT Bengaluru
+YEAR 2026      [████████████████████░░]   90.8%   Day 332 / 365
+B.TECH ECE     [█████████████░░░░░░░░░]   60.7%   Sem 5 / 8 · MIT Bengaluru
 CONTRIBUTIONS  [████████████████░░░░░░]   71.5%   1,073+ total across 26 repos
 OPEN SOURCE    [████████████████░░░░░░]   72.0%   18 / 25 public repositories
 
